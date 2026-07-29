@@ -50,3 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bundle workflow skills under docs/skills for self-contained agent tooling
 - keep legacy icon under resources as bundle fallback
 - drop redundant root icon.svg; asset catalog remains canonical
+
+### Refactor
+
+- switch GrowattOpenAPIService to local `GET /status` endpoint with `x-api-key` auth and new DTO shape
