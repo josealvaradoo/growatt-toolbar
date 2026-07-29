@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add project constitution (AGENTS.md) with stack, do/don't, and skills index
 - add comprehensive implementation plan (PLAN.md) with 5 phases and checklist
 - add changelog tracking every project change
+- drop redundant root icon.svg and remove from directory tree
 
 ### Chore
 
@@ -48,3 +49,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add ad-hoc test runner executable (GrowattToolbarTestRunner) for manual smoke checks
 - bundle workflow skills under docs/skills for self-contained agent tooling
 - keep legacy icon under resources as bundle fallback
+- drop redundant root icon.svg; asset catalog remains canonical

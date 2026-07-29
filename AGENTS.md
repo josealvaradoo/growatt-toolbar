@@ -13,7 +13,6 @@ growatt-toolbar/
 |_ AGENTS.md
 |_ PLAN.md
 |_ Package.swift
-|_ icon.svg
 |_ src/
   |_ GrowattToolbarApp/
   |  |_ GrowattToolbarApp.swift
