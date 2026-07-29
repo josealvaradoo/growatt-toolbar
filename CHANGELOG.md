@@ -59,3 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bug fixes
 
 - make status bar button title reactive to InverterViewModel.status so it reflects the latest batterySoC without opening the popover
+
+### Features
+
+- add liquid glass design tokens (GlassTokens) shared across the popover hierarchy
