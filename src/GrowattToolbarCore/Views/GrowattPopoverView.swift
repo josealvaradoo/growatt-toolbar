@@ -35,7 +35,7 @@ public struct GrowattPopoverView: View {
         } else if #available(macOS 26, *) {
             shape
                 .fill(Color.clear)
-                .glassEffect(in: shape)
+                .glassEffect(.clear, in: shape)
         } else {
             shape.fill(.ultraThinMaterial)
         }
@@ -158,7 +158,7 @@ public struct GrowattPopoverView: View {
         } else if #available(macOS 26, *) {
             shape
                 .fill(Color.clear)
-                .glassEffect(.regular.interactive(), in: shape)
+                .glassEffect(.clear.interactive(), in: shape)
         } else {
             shape.fill(.ultraThinMaterial)
         }

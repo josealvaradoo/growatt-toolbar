@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - drop .idle / .unknown gradient branches from BatteryIndicatorView
 - rewrite GrowattPopoverView as a single Liquid Glass surface with a GlassEffectContainer on macOS 26; drop the unused mock-state tap gesture and the stale batteryPowerKW reference
 - apply Liquid Glass correctly on macOS 26: only the popover surface itself is glass, hero content sits on a `.regularMaterial` card, the metric tile uses `.regularMaterial` (not glass), and the GlassEffectContainer is removed so glass surfaces no longer merge and wash out the text; drop the now-unused LiquidGlassCard
+- switch the popover background and refresh button to the `.clear` Liquid Glass variant for a more transparent look
+
 
 ### Features
 
