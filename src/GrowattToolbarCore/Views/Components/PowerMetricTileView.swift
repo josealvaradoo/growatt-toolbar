@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// Compact glass tile component for displaying individual energy metrics (Solar, Grid, Home Load).
+/// Compact glass tile for individual energy metrics (Solar, Grid, Home Load).
+/// Uses the real `.glassEffect(...)` API on macOS 26 with a `.ultraThinMaterial`
+/// fallback on macOS 15, and respects `accessibilityReduceTransparency`.
 public struct PowerMetricTileView: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     public let iconName: String
     public let title: String
     public let valueKW: Double
@@ -34,14 +37,21 @@ public struct PowerMetricTileView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                }
+        .padding(GlassTokens.Padding.tile)
+        .background { background }
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.tile, style: .continuous)
+        if reduceTransparency {
+            shape.fill(Color(nsColor: .windowBackgroundColor))
+        } else if #available(macOS 26, *) {
+            shape
+                .fill(Color.clear)
+                .glassEffect(in: shape)
+        } else {
+            shape.fill(.ultraThinMaterial)
         }
     }
 }
@@ -49,7 +59,13 @@ public struct PowerMetricTileView: View {
 struct PowerMetricTileView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            LinearGradient(
+                colors: [.blue.opacity(0.4), .purple.opacity(0.4)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
             HStack(spacing: 10) {
                 PowerMetricTileView(iconName: "sun.max.fill", title: "Solar Output", valueKW: 1.5)
                 PowerMetricTileView(iconName: "transmission.tower", title: "Grid Import", valueKW: 3.5)
