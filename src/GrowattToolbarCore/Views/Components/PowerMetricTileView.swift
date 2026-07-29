@@ -1,8 +1,10 @@
 import SwiftUI
 
 /// Compact glass tile for individual energy metrics (Solar, Grid, Home Load).
-/// Uses the real `.glassEffect(...)` API on macOS 26 with a `.ultraThinMaterial`
-/// fallback on macOS 15, and respects `accessibilityReduceTransparency`.
+/// Uses `.regularMaterial` so the tile reads as a solid frosted surface on top
+/// of the popover's Liquid Glass background — no glass-on-glass stacking.
+/// Honors `accessibilityReduceTransparency` by switching to a solid
+/// `windowBackgroundColor` fill.
 public struct PowerMetricTileView: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     public let iconName: String
@@ -46,12 +48,8 @@ public struct PowerMetricTileView: View {
         let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.tile, style: .continuous)
         if reduceTransparency {
             shape.fill(Color(nsColor: .windowBackgroundColor))
-        } else if #available(macOS 26, *) {
-            shape
-                .fill(Color.clear)
-                .glassEffect(in: shape)
         } else {
-            shape.fill(.ultraThinMaterial)
+            shape.fill(.regularMaterial)
         }
     }
 }
@@ -67,6 +65,8 @@ struct PowerMetricTileView_Previews: PreviewProvider {
             .ignoresSafeArea()
 
             HStack(spacing: 10) {
+                PowerMetricTileView(iconName: "sun.max.fill", title: "Solar Output", valueKW: 1.5)
+                PowerMetricTileView(iconName: "transmission.tower", title: "Grid Import", valueKW: 3.5)
                 PowerMetricTileView(iconName: "house.fill", title: "Home Load", valueKW: 1.8)
             }
             .padding()
