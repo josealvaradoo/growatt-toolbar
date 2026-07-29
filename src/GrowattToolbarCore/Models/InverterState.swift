@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// Represents the operating state of the Growatt battery inverter.
 /// Only the two states reported by the `/status` endpoint are modeled;
