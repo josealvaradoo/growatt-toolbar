@@ -1,50 +1,60 @@
 import SwiftUI
 
-/// Reusable Liquid Glass card container view providing modern macOS Tahoe glass translucency.
+/// Reusable Liquid Glass card container. Uses the real `.glassEffect(...)` API
+/// on macOS 26 (Tahoe) and falls back to `.ultraThinMaterial` on macOS 15
+/// (Sequoia). Honors `accessibilityReduceTransparency` per the platform
+/// guidance — when the user opts out of translucency the card paints with a
+/// solid `windowBackgroundColor` so the typography stays legible.
 public struct LiquidGlassCard<Content: View>: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     private let content: Content
     private let cornerRadius: CGFloat
 
-    public init(cornerRadius: CGFloat = 16, @ViewBuilder content: () -> Content) {
+    public init(
+        cornerRadius: CGFloat = GlassTokens.Radius.card,
+        @ViewBuilder content: () -> Content
+    ) {
         self.cornerRadius = cornerRadius
         self.content = content()
     }
 
     public var body: some View {
         content
-            .padding()
-            .background {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.35),
-                                        Color.white.opacity(0.08)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                    .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 5)
-            }
+            .padding(GlassTokens.Padding.card)
+            .background { background }
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        if reduceTransparency {
+            shape.fill(Color(nsColor: .windowBackgroundColor))
+        } else if #available(macOS 26, *) {
+            shape
+                .fill(Color.clear)
+                .glassEffect(in: shape)
+        } else {
+            shape.fill(.ultraThinMaterial)
+        }
     }
 }
 
 struct LiquidGlassCard_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            LinearGradient(
+                colors: [.blue.opacity(0.4), .purple.opacity(0.4)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
             LiquidGlassCard {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Liquid Glass Preview")
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text("Translucent materials in macOS Tahoe style.")
+                    Text("Translucent material in macOS Tahoe style.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

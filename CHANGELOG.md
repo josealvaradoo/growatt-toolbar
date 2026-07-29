@@ -64,3 +64,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - add liquid glass design tokens (GlassTokens) shared across the popover hierarchy
 - expose GlassTokens as public so the public component API can reference the shared radii and padding
+- use real glassEffect in LiquidGlassCard on macOS 26 with reduceTransparency fallback to window background and .ultraThinMaterial on macOS 15
