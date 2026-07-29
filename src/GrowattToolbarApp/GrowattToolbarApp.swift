@@ -19,7 +19,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize Status Bar Controller & Menu Bar Popover
-        let viewModel = InverterViewModel()
+        let apiToken = ProcessInfo.processInfo.environment["GROWATT_API_KEY"] ?? ""
+        let service = GrowattOpenAPIService(
+            baseURLString: "http://localhost:3000",
+            apiToken: apiToken
+        )
+        let viewModel = InverterViewModel(service: service)
         statusBarController = StatusBarController(viewModel: viewModel)
 
         // Hide main app dock icon since it's a menu bar toolbar app

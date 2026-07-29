@@ -15,7 +15,7 @@ public final class InverterViewModel {
     private var mockService: MockGrowattAPIService?
     private var pollingTask: Task<Void, Never>?
 
-    public init(service: GrowattAPIServiceProtocol = MockGrowattAPIService()) {
+    public init(service: GrowattAPIServiceProtocol = GrowattOpenAPIService()) {
         self.apiService = service
         self.mockService = service as? MockGrowattAPIService
         self.status = InverterStatus(
@@ -55,7 +55,7 @@ public final class InverterViewModel {
     }
 
     /// Starts periodic auto-refreshing in the background.
-    public func startAutoRefresh(intervalSeconds: TimeInterval = 30.0) {
+    public func startAutoRefresh(intervalSeconds: TimeInterval = 120.0) {
         stopAutoRefresh()
         pollingTask = Task { [weak self] in
             while !Task.isCancelled {
