@@ -5,6 +5,14 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.12.0 (2026-07-29)
+
+---
+
+### Features
+
+- add growatt open api client (GrowattOpenAPIService) placeholder for real http integration
+
 ## 0.11.0 (2026-07-29)
 
 ---
