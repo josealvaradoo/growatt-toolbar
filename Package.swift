@@ -1,0 +1,33 @@
+// swift-tools-version: 6.0
+import PackageDescription
+
+let package = Package(
+    name: "GrowattToolbar",
+    platforms: [
+        .macOS(.v15)
+    ],
+    products: [
+        .executable(name: "GrowattToolbarApp", targets: ["GrowattToolbarApp"]),
+        .executable(name: "GrowattToolbarTestRunner", targets: ["GrowattToolbarTestRunner"]),
+        .library(name: "GrowattToolbarCore", targets: ["GrowattToolbarCore"])
+    ],
+    targets: [
+        .target(
+            name: "GrowattToolbarCore",
+            path: "src/GrowattToolbarCore"
+        ),
+        .executableTarget(
+            name: "GrowattToolbarApp",
+            dependencies: ["GrowattToolbarCore"],
+            path: "src/GrowattToolbarApp",
+            resources: [
+                .process("Resources")
+            ]
+        ),
+        .executableTarget(
+            name: "GrowattToolbarTestRunner",
+            dependencies: ["GrowattToolbarCore"],
+            path: "Tests/GrowattToolbarTestRunner"
+        )
+    ]
+)
