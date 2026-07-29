@@ -1,7 +1,7 @@
 import Foundation
 
-/// Status API client fetching inverter telemetry from a local `GET /status` endpoint
-/// authenticated with an `x-api-key` header.
+/// Status API client fetching inverter telemetry from a local `GET /status`
+/// endpoint authenticated with an `x-api-key` header.
 public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
     private let baseURL: URL
     private let apiToken: String
@@ -18,9 +18,7 @@ public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
     }
 
     public func fetchInverterStatus() async throws -> InverterStatus {
-        guard !apiToken.isEmpty else {
-            throw GrowattAPIError.unauthorized
-        }
+        guard !apiToken.isEmpty else { throw GrowattAPIError.unauthorized }
 
         var request = URLRequest(url: baseURL.appendingPathComponent("status"))
         request.httpMethod = "GET"
@@ -41,8 +39,7 @@ public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
         }
 
         do {
-            let decoded = try JSONDecoder().decode(StatusResponseDTO.self, from: data)
-            return decoded.toDomainModel()
+            return try JSONDecoder().decode(StatusResponseDTO.self, from: data).toDomainModel()
         } catch {
             throw GrowattAPIError.decodingError(error.localizedDescription)
         }
@@ -57,25 +54,20 @@ struct StatusResponseDTO: Decodable {
     struct StatusData: Decodable {
         let level: Int
         let isCharging: Bool
-        let consumptionWatts: Double
+        let outputPower: Double
 
         enum CodingKeys: String, CodingKey {
             case level
             case isCharging = "is_charging"
-            case consumptionWatts = "consumption_watts"
+            case outputPower = "output_power"
         }
     }
 
     func toDomainModel() -> InverterStatus {
-        let powerKW = data.consumptionWatts / 1000.0
-        let state: InverterState = data.isCharging ? .charging : .discharging
-        let batteryPowerKW = data.isCharging ? powerKW : -powerKW
-
-        return InverterStatus(
+        InverterStatus(
             batterySoC: data.level,
-            state: state,
-            batteryPowerKW: batteryPowerKW,
-            outputPowerKW: powerKW,
+            state: data.isCharging ? .charging : .discharging,
+            outputPowerKW: data.outputPower / 1000.0,
             lastUpdated: Date()
         )
     }
