@@ -8,7 +8,6 @@ let package = Package(
     ],
     products: [
         .executable(name: "GrowattToolbarApp", targets: ["GrowattToolbarApp"]),
-        .executable(name: "GrowattToolbarTestRunner", targets: ["GrowattToolbarTestRunner"]),
         .library(name: "GrowattToolbarCore", targets: ["GrowattToolbarCore"])
     ],
     targets: [
@@ -23,11 +22,6 @@ let package = Package(
             resources: [
                 .process("Resources")
             ]
-        ),
-        .executableTarget(
-            name: "GrowattToolbarTestRunner",
-            dependencies: ["GrowattToolbarCore"],
-            path: "Tests/GrowattToolbarTestRunner"
         )
     ]
 )

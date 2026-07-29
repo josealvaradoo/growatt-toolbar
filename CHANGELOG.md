@@ -61,6 +61,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - drop .idle / .unknown gradient branches from BatteryIndicatorView
 - rewrite GrowattPopoverView as a single Liquid Glass surface with a GlassEffectContainer on macOS 26; drop the unused mock-state tap gesture and the stale batteryPowerKW reference
 
+### Chore
+
+- drop unused MockGrowattAPIService, StatusBarItemView, XCTest files, ad-hoc test runner, and the GrowattToolbarTestRunner target from Package.swift
+
 ### Features
 
 - add liquid glass design tokens (GlassTokens) shared across the popover hierarchy
