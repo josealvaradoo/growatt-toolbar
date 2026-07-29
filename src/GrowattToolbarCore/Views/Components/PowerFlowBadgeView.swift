@@ -1,7 +1,11 @@
 import SwiftUI
 
-/// Badge component displaying the current inverter state pill and active power rate description.
+/// Status pill for the active inverter state. The pill surface uses a tinted
+/// Liquid Glass effect on macOS 26 (`.glassEffect(.regular.tint(accentColor))`)
+/// and falls back to a state-tinted solid on macOS 15. Honors
+/// `accessibilityReduceTransparency`.
 public struct PowerFlowBadgeView: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     public let state: InverterState
     public let powerDescription: String
 
@@ -12,7 +16,6 @@ public struct PowerFlowBadgeView: View {
 
     public var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
-            // Status Pill Badge
             HStack(spacing: 6) {
                 Image(systemName: state.iconName)
                     .font(.caption.bold())
@@ -20,29 +23,28 @@ public struct PowerFlowBadgeView: View {
                     .font(.caption.bold())
                     .fontDesign(.rounded)
             }
-            .foregroundStyle(Color.black.opacity(0.9))
+            .foregroundStyle(.primary)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background {
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                state.accentColor,
-                                state.accentColor.opacity(0.85)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: state.accentColor.opacity(0.6), radius: 8, x: 0, y: 2)
-            }
+            .background { badgeBackground }
 
-            // Power Description Subtitle
             Text(powerDescription)
                 .font(.caption)
                 .fontDesign(.monospaced)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var badgeBackground: some View {
+        if reduceTransparency {
+            Capsule().fill(state.accentColor.opacity(0.18))
+        } else if #available(macOS 26, *) {
+            Capsule()
+                .fill(Color.clear)
+                .glassEffect(.regular.tint(state.accentColor), in: Capsule())
+        } else {
+            Capsule().fill(state.accentColor.opacity(0.22))
         }
     }
 }
@@ -50,7 +52,13 @@ public struct PowerFlowBadgeView: View {
 struct PowerFlowBadgeView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            LinearGradient(
+                colors: [.blue.opacity(0.4), .purple.opacity(0.4)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
             PowerFlowBadgeView(state: .charging, powerDescription: "+3.2 kW grid power")
                 .padding()
         }
