@@ -72,7 +72,7 @@ public struct GrowattPopoverView: View {
                 PowerMetricTileView(
                     iconName: "house.fill",
                     title: "Home Load",
-                    valueKW: viewModel.status.homeLoadKW
+                    valueKW: viewModel.status.outputPowerKW
                 )
             }
 

@@ -67,3 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - use real glassEffect in LiquidGlassCard on macOS 26 with reduceTransparency fallback to window background and .ultraThinMaterial on macOS 15
 - use real glassEffect in PowerMetricTileView with the same reduceTransparency and macOS 15 fallback
 - use tinted glassEffect in PowerFlowBadgeView with state accent color and the same reduceTransparency and macOS 15 fallback
+- wrap GrowattPopoverView in GlassEffectContainer with real glass background and an interactive glass refresh button on macOS 26
+- surface outputPowerKW on InverterStatus (mapped from /status consumption_watts) and render it in the Home Load tile
+

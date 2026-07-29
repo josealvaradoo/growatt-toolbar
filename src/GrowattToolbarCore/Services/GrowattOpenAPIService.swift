@@ -57,17 +57,17 @@ struct StatusResponseDTO: Decodable {
     struct StatusData: Decodable {
         let level: Int
         let isCharging: Bool
-        let outputPower: Double
+        let consumptionWatts: Double
 
         enum CodingKeys: String, CodingKey {
             case level
             case isCharging = "is_charging"
-            case outputPower = "output_power"
+            case consumptionWatts = "consumption_watts"
         }
     }
 
     func toDomainModel() -> InverterStatus {
-        let powerKW = data.outputPower / 1000.0
+        let powerKW = data.consumptionWatts / 1000.0
         let state: InverterState = data.isCharging ? .charging : .discharging
         let batteryPowerKW = data.isCharging ? powerKW : -powerKW
 
@@ -75,6 +75,7 @@ struct StatusResponseDTO: Decodable {
             batterySoC: data.level,
             state: state,
             batteryPowerKW: batteryPowerKW,
+            outputPowerKW: powerKW,
             lastUpdated: Date()
         )
     }

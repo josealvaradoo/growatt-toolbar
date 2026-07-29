@@ -11,6 +11,10 @@ public struct InverterStatus: Codable, Equatable, Sendable {
     /// Battery power in kilowatts (kW). Positive when charging, negative when discharging.
     public let batteryPowerKW: Double
 
+    /// Inverter output power in kilowatts (kW), expressed as the absolute rate at
+    /// which the home is drawing from the inverter. Always non-negative.
+    public let outputPowerKW: Double
+
     /// Solar generation power output in kilowatts (kW).
     public let solarOutputKW: Double
 
@@ -27,6 +31,7 @@ public struct InverterStatus: Codable, Equatable, Sendable {
         batterySoC: Int,
         state: InverterState,
         batteryPowerKW: Double,
+        outputPowerKW: Double = 0.0,
         solarOutputKW: Double = 0.0,
         gridImportKW: Double = 0.0,
         homeLoadKW: Double = 0.0,
@@ -35,6 +40,7 @@ public struct InverterStatus: Codable, Equatable, Sendable {
         self.batterySoC = min(max(batterySoC, 0), 100)
         self.state = state
         self.batteryPowerKW = batteryPowerKW
+        self.outputPowerKW = max(outputPowerKW, 0)
         self.solarOutputKW = solarOutputKW
         self.gridImportKW = gridImportKW
         self.homeLoadKW = homeLoadKW
