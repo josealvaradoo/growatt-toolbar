@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Animated visual battery gauge displaying state of charge percentage with state-based gradient fills.
+/// Animated visual battery gauge displaying state of charge percentage with
+/// state-based gradient fills.
 public struct BatteryIndicatorView: View {
     public let levelPercentage: Int
     public let state: InverterState
@@ -16,19 +17,13 @@ public struct BatteryIndicatorView: View {
             return [Color(red: 0.15, green: 0.85, blue: 0.45), Color(red: 0.25, green: 0.95, blue: 0.55)]
         case .discharging:
             return [Color.orange, Color(red: 1.0, green: 0.65, blue: 0.2)]
-        case .idle:
-            return [Color.blue, Color(red: 0.4, green: 0.7, blue: 1.0)]
-        case .unknown:
-            return [Color.gray, Color.secondary]
         }
     }
 
     public var body: some View {
         HStack(spacing: 4) {
-            // Main Battery Capsule Container
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    // Track Background
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.black.opacity(0.4))
                         .overlay {
@@ -36,7 +31,6 @@ public struct BatteryIndicatorView: View {
                                 .stroke(Color.white.opacity(0.15), lineWidth: 1)
                         }
 
-                    // Progress Fill Bar
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(
                             LinearGradient(
@@ -53,7 +47,6 @@ public struct BatteryIndicatorView: View {
             }
             .frame(height: 38)
 
-            // Battery Tip Cap
             RoundedRectangle(cornerRadius: 3, style: .continuous)
                 .fill(Color.white.opacity(0.3))
                 .frame(width: 5, height: 16)

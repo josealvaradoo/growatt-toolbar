@@ -55,10 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - switch GrowattOpenAPIService to local `GET /status` endpoint with `x-api-key` auth and new DTO shape
 - wire real /status service as InverterViewModel default and poll every 2 minutes via GROWATT_API_KEY env var
-
-### Bug fixes
-
-- make status bar button title reactive to InverterViewModel.status so it reflects the latest batterySoC without opening the popover
+- drop batteryPowerKW, solarOutputKW, gridImportKW, homeLoadKW from InverterStatus; keep only the 4 fields the backend actually returns plus lastUpdated
+- reduce InverterState to the two cases the /status endpoint emits (charging, discharging)
+- drop unused .invalidURL case from GrowattAPIError
+- drop .idle / .unknown gradient branches from BatteryIndicatorView
 
 ### Features
 

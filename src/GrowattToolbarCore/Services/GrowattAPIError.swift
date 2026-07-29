@@ -1,8 +1,7 @@
 import Foundation
 
-/// Errors that can occur during Growatt API operations.
+/// Errors that can occur during `/status` API operations.
 public enum GrowattAPIError: Error, Equatable, LocalizedError, Sendable {
-    case invalidURL
     case networkError(String)
     case decodingError(String)
     case unauthorized
@@ -10,12 +9,10 @@ public enum GrowattAPIError: Error, Equatable, LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidURL:
-            return "Invalid API URL requested."
         case .networkError(let message):
             return "Network connection failed: \(message)"
         case .decodingError(let details):
-            return "Failed to parse Growatt response: \(details)"
+            return "Failed to parse response: \(details)"
         case .unauthorized:
             return "Unauthorized API key or token."
         case .serverError(let statusCode):
