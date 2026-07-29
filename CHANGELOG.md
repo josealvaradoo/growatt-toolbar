@@ -63,3 +63,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Features
 
 - add liquid glass design tokens (GlassTokens) shared across the popover hierarchy
+- expose GlassTokens as public so the public component API can reference the shared radii and padding
