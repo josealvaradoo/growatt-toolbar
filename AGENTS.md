@@ -32,7 +32,6 @@ growatt-toolbar/
     |_ Views/
       |_ GrowattPopoverView.swift
       |_ Components/
-        |_ LiquidGlassCard.swift
         |_ BatteryIndicatorView.swift
         |_ PowerFlowBadgeView.swift
         |_ PowerMetricTileView.swift
