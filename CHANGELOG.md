@@ -59,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - reduce InverterState to the two cases the /status endpoint emits (charging, discharging)
 - drop unused .invalidURL case from GrowattAPIError
 - drop .idle / .unknown gradient branches from BatteryIndicatorView
+- rewrite GrowattPopoverView as a single Liquid Glass surface with a GlassEffectContainer on macOS 26; drop the unused mock-state tap gesture and the stale batteryPowerKW reference
 
 ### Features
 
