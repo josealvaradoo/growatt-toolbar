@@ -67,8 +67,6 @@ struct PowerMetricTileView_Previews: PreviewProvider {
             .ignoresSafeArea()
 
             HStack(spacing: 10) {
-                PowerMetricTileView(iconName: "sun.max.fill", title: "Solar Output", valueKW: 1.5)
-                PowerMetricTileView(iconName: "transmission.tower", title: "Grid Import", valueKW: 3.5)
                 PowerMetricTileView(iconName: "house.fill", title: "Home Load", valueKW: 1.8)
             }
             .padding()
