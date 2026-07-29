@@ -1,10 +1,12 @@
 import SwiftUI
 
 /// Main popover view presenting Growatt inverter status inside a macOS Tahoe
-/// Liquid Glass surface. On macOS 26 the popover, hero card, badge and refresh
-/// button read as a single cohesive material via `GlassEffectContainer`; on
-/// macOS 15 the same composition falls back to `.ultraThinMaterial`. Honors
-/// `accessibilityReduceTransparency` throughout.
+/// Liquid Glass surface. Per Apple's HIG, glass is reserved for the
+/// navigation layer (this popover background) and the small interactive
+/// controls (the power-flow badge and the refresh button). The content sits
+/// on `.regularMaterial` cards so the text stays legible — no glass-on-glass
+/// stacking. On macOS 15 the same composition falls back to
+/// `.ultraThinMaterial`. Honors `accessibilityReduceTransparency` throughout.
 public struct GrowattPopoverView: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Bindable public var viewModel: InverterViewModel
@@ -14,20 +16,9 @@ public struct GrowattPopoverView: View {
     }
 
     public var body: some View {
-        if #available(macOS 26, *) {
-            GlassEffectContainer(spacing: 20) {
-                popoverStack
-            }
-        } else {
-            popoverStack
-        }
-    }
-
-    @ViewBuilder
-    private var popoverStack: some View {
         VStack(spacing: 16) {
             header
-            heroCard
+            heroContent
             metricsRow
             footer
         }
@@ -79,32 +70,42 @@ public struct GrowattPopoverView: View {
         }
     }
 
-    private var heroCard: some View {
-        LiquidGlassCard {
-            VStack(spacing: 16) {
-                HStack(alignment: .top) {
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        Text("\(viewModel.status.batterySoC)")
-                            .font(.system(size: 44, weight: .bold, design: .rounded))
-                            .foregroundStyle(.primary)
-                        Text("%")
-                            .font(.title.bold())
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    PowerFlowBadgeView(
-                        state: viewModel.status.state,
-                        powerDescription: viewModel.status.formattedPowerDescription
-                    )
+    private var heroContent: some View {
+        VStack(spacing: 16) {
+            HStack(alignment: .top) {
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text("\(viewModel.status.batterySoC)")
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                    Text("%")
+                        .font(.title.bold())
+                        .foregroundStyle(.secondary)
                 }
 
-                BatteryIndicatorView(
-                    levelPercentage: viewModel.status.batterySoC,
-                    state: viewModel.status.state
+                Spacer()
+
+                PowerFlowBadgeView(
+                    state: viewModel.status.state,
+                    powerDescription: viewModel.status.formattedPowerDescription
                 )
             }
+
+            BatteryIndicatorView(
+                levelPercentage: viewModel.status.batterySoC,
+                state: viewModel.status.state
+            )
+        }
+        .padding(GlassTokens.Padding.card)
+        .background { heroBackground }
+    }
+
+    @ViewBuilder
+    private var heroBackground: some View {
+        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
+        if reduceTransparency {
+            shape.fill(Color(nsColor: .windowBackgroundColor))
+        } else {
+            shape.fill(.regularMaterial)
         }
     }
 
