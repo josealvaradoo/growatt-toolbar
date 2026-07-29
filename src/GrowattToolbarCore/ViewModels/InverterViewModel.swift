@@ -1,60 +1,37 @@
 import Foundation
-import SwiftUI
 import Observation
 
-/// Main ViewModel coordinating inverter data fetching, background polling, and state representation.
+/// ViewModel coordinating inverter data fetching and background polling.
 @Observable
 @MainActor
 public final class InverterViewModel {
     public var status: InverterStatus
     public var isLoading: Bool = false
-    public var errorMessage: String? = nil
-    public var isMockingData: Bool = true
+    public var errorMessage: String?
 
-    private var apiService: GrowattAPIServiceProtocol
-    private var mockService: MockGrowattAPIService?
+    private let apiService: GrowattAPIServiceProtocol
     private var pollingTask: Task<Void, Never>?
 
     public init(service: GrowattAPIServiceProtocol = GrowattOpenAPIService()) {
         self.apiService = service
-        self.mockService = service as? MockGrowattAPIService
         self.status = InverterStatus(
-            batterySoC: 85,
+            batterySoC: 0,
             state: .charging,
-            batteryPowerKW: 3.2,
-            solarOutputKW: 1.5,
-            gridImportKW: 3.5,
-            homeLoadKW: 1.8,
-            lastUpdated: Date()
+            outputPowerKW: 0
         )
     }
 
-    /// Fetches the latest data from the configured API service.
     public func refreshData() async {
         isLoading = true
         errorMessage = nil
-
         do {
-            let newStatus = try await apiService.fetchInverterStatus()
-            self.status = newStatus
+            self.status = try await apiService.fetchInverterStatus()
         } catch {
             self.errorMessage = error.localizedDescription
         }
-
         isLoading = false
     }
 
-    /// Toggles mock data state (useful for UI testing charging vs discharging).
-    public func toggleMockState() {
-        if let mock = mockService {
-            mock.toggleState()
-            Task {
-                await refreshData()
-            }
-        }
-    }
-
-    /// Starts periodic auto-refreshing in the background.
     public func startAutoRefresh(intervalSeconds: TimeInterval = 120.0) {
         stopAutoRefresh()
         pollingTask = Task { [weak self] in
@@ -65,7 +42,6 @@ public final class InverterViewModel {
         }
     }
 
-    /// Stops periodic auto-refreshing.
     public func stopAutoRefresh() {
         pollingTask?.cancel()
         pollingTask = nil
