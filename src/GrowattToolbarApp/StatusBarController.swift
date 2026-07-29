@@ -18,6 +18,7 @@ public final class StatusBarController: NSObject {
         setupPopover()
         setupStatusItem()
         viewModel.startAutoRefresh()
+        observeStatus()
     }
 
     private func setupPopover() {
@@ -61,6 +62,18 @@ public final class StatusBarController: NSObject {
         guard let button = statusItem.button else { return }
         let soc = viewModel.status.batterySoC
         button.title = " \(soc)%"
+    }
+
+    private func observeStatus() {
+        withObservationTracking { [weak self] in
+            _ = self?.viewModel.status.batterySoC
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.updateButtonTitle()
+                self.observeStatus()
+            }
+        }
     }
 
     @objc private func togglePopover(_ sender: AnyObject?) {
