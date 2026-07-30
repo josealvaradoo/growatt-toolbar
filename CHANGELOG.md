@@ -217,6 +217,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     "perfect" character of the pre-0.2.11 design.
   - Build: 0 warnings, 0 errors.
 
+## 0.2.13 (2026-07-30)
+
+---
+
+### Fix
+
+- **fix(ui): eliminate popover content blur caused by GlassEffectContainer.** The popover's inner content (title, freshness pill, battery hero, metric tile) rendered blurred and milky while the glass shell looked correct. Three compounding root causes, all now fixed:
+  1. **GlassEffectContainer wrapped the entire content tree** (`GrowattPopoverView.body`). Per Apple's docs, the `glassEffect(_:in:)` modifier "captures the content to send to the container to render" — the full-size background glass unioned with the badge and button glass, capturing all interior content into a shared lensing pass. Removed the `.glassContainer(spacing:)` call from the popover body and deleted the now-dead `GlassContainerModifier.swift`. This supersedes the incorrect 0.2.12 rationale ("the container only affects glass surfaces").
+  2. **The shell used the `.clear` Liquid Glass variant** outside its documented preconditions (media-rich backdrop, dimming layer, bold/bright overlay content). Clear never applies the adaptive legibility treatment, washing out the header title and pill that sit directly on the glass. Switched to `.glassEffect(.regular, in:)`, which applies the system's automatic vibrant legibility treatment to all content above it.
+  3. **`.clear` shell mixed with `.regular` badge** — Apple prohibits mixing variants ("incompatible lighting models"). The shell, badge, and refresh button are now all in the Regular family.
+- Collapse the three identical `if reduceTransparency { X } else { X }` background branches in `GrowattPopoverView.heroBackground`, `PowerMetricTileView.background`, and `ErrorBannerView.background` into single fill expressions; remove the now-unused `@Environment(\.accessibilityReduceTransparency)` properties from `PowerMetricTileView` and `ErrorBannerView`. Zero behavior change — RT users keep the same opaque surface.
+- Amend `DESIGN.md`: scope the `GlassEffectContainer` Do-rule to adjacent glass clusters only (never wrap content hierarchies or full-size background glass), document the popover-shell pattern (`.glassEffect(.regular, in:)` root background, opaque inner cards, no container), and add a Don't against wrapping content in a container.
+- Update `GrowattPopoverView`'s top doc comment to describe the actual architecture (Regular glass shell, no container, opaque inner cards).
+- Build: 0 warnings, 0 errors.
+
 ## 0.1.0 (2026-07-29)
 
 ---
