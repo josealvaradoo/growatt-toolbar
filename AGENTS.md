@@ -34,7 +34,6 @@ growatt-toolbar/
       |_ Components/
         |_ BatteryIndicatorView.swift
         |_ PowerFlowBadgeView.swift
-        |_ PowerMetricTileView.swift
         |_ GlassTokens.swift
 ```
 

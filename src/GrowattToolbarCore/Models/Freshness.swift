@@ -46,24 +46,13 @@ extension Freshness {
         }
     }
 
-    /// Compact VoiceOver label that captures the full meaning, including the
-    /// freshness category and the time-since-last-update when relevant.
-    public func accessibilityLabel(secondsSinceLastUpdate: TimeInterval? = nil) -> String {
+    /// Compact VoiceOver label for the freshness category.
+    public func accessibilityLabel() -> String {
         switch self {
-        case .awaiting:
-            return "Connecting to inverter"
-        case .live:
-            return "Live data"
-        case .stale:
-            if let seconds = secondsSinceLastUpdate {
-                return "Stale data, updated \(Int(seconds)) seconds ago"
-            }
-            return "Stale data"
-        case .error:
-            if let seconds = secondsSinceLastUpdate {
-                return "Offline, last reading \(Int(seconds)) seconds ago"
-            }
-            return "Offline"
+        case .awaiting: return "Connecting to inverter"
+        case .live:     return "Live data"
+        case .stale:    return "Stale data"
+        case .error:    return "Offline"
         }
     }
 }

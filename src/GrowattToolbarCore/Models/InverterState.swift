@@ -4,7 +4,7 @@ import SwiftUI
 /// Represents the operating state of the Growatt battery inverter.
 /// Only the two states reported by the `/status` endpoint are modeled;
 /// add new cases here only when the backend starts emitting them.
-public enum InverterState: String, Codable, Sendable, CaseIterable {
+public enum InverterState: String, Codable, Sendable {
     case charging = "CHARGING"
     case discharging = "DISCHARGING"
 

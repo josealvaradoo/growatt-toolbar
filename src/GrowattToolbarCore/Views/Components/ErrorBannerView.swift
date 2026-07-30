@@ -65,8 +65,7 @@ public struct ErrorBannerView: View {
 
     // MARK: - Time helper
 
-    /// Public so the popover's other time-aware copy stays in sync.
-    public static func relativeString(for seconds: TimeInterval) -> String {
+    private static func relativeString(for seconds: TimeInterval) -> String {
         if seconds < 5 { return "just now" }
         if seconds < 60 { return "\(Int(seconds))s ago" }
         if seconds < 3600 { return "\(Int(seconds / 60))m ago" }
