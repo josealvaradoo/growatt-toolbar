@@ -13,7 +13,7 @@ public struct InverterStatus: Codable, Equatable, Sendable {
     /// reports `output_power` as the watt draw the home is currently
     /// drawing from the inverter / grid — *consumption*, not generation.
     /// This value is independent of the battery's charging direction.
-    /// Rendered in the popover by `PowerMetricTileView` (the "Home Load" tile);
+    /// Rendered inline in the two-column hero row ("Home Load" label);
     /// the battery state badge shows only the state, not this value.
     public let outputPowerKW: Double
 

@@ -16,36 +16,30 @@ public struct BatteryIndicatorPlaceholder: View {
     public init() {}
 
     public var body: some View {
-        HStack(spacing: GlassTokens.Spacing.xs) {
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule(style: .continuous)
-                        .fill(Color.black.opacity(0.18))
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule(style: .continuous)
+                    .fill(Color.black.opacity(0.18))
 
-                    if !reduceMotion {
-                        Capsule(style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        .white.opacity(0.0),
-                                        .white.opacity(0.45),
-                                        .white.opacity(0.0)
-                                    ],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
+                if !reduceMotion {
+                    Capsule(style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(0.0),
+                                    .white.opacity(0.45),
+                                    .white.opacity(0.0)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
-                            .frame(width: geometry.size.width * 0.35)
-                            .offset(x: shimmerOffset(in: geometry.size.width))
-                    }
+                        )
+                        .frame(width: geometry.size.width * 0.35)
+                        .offset(x: shimmerOffset(in: geometry.size.width))
                 }
             }
-            .frame(height: 38)
-
-            RoundedRectangle(cornerRadius: GlassTokens.Radius.terminal, style: .continuous)
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 5, height: 16)
         }
+        .frame(height: 12)
         .accessibilityHidden(true)
     }
 

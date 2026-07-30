@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Designed error banner shown in the popover hero when the most recent
-/// poll failed. Replaces the hero's percentage / state / battery bar with
-/// a single, composed affordance:
+/// Compact flat error indicator shown in the popover hero when the most
+/// recent poll failed. Renders directly on the parent popover's glass
+/// surface (no card background). Replaces the hero's percentage / state /
+/// battery bar with a single, composed affordance:
 ///
 ///   - Energy-specific icon (`bolt.slash.fill`)
 ///   - "Can't reach inverter" headline
@@ -51,7 +52,6 @@ public struct ErrorBannerView: View {
         }
         .padding(GlassTokens.Padding.card)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background { background }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Can't reach inverter. \(subtitle). Refresh button.")
     }
@@ -61,14 +61,6 @@ public struct ErrorBannerView: View {
             return "Last reading \(Self.relativeString(for: seconds))"
         }
         return "No previous reading"
-    }
-
-    // MARK: - Background
-
-    private var background: some View {
-        // Opaque card on a glass popover shell (see `GrowattPopoverView.heroBackground`).
-        RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
-            .fill(Color(nsColor: .controlBackgroundColor))
     }
 
     // MARK: - Time helper
@@ -87,7 +79,7 @@ struct ErrorBannerView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: GlassTokens.Spacing.xl) {
             ErrorBannerView(viewModel: InverterViewModel())
-                .frame(width: 360)
+                .frame(width: 280)
         }
         .padding()
         .background(

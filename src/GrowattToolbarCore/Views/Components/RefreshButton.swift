@@ -9,7 +9,8 @@ import SwiftUI
 /// Behavior contract:
 /// - On macOS 26+: uses the system `ButtonStyle.glass`, which provides
 ///   the liquid-glass material, hover/press/disabled states, and a
-///   44pt hit target via `controlSize(.regular)` automatically.
+///   compact hit target via `controlSize(.small)` that fits the
+///   280pt popover's state row.
 /// - On macOS 15: falls back to `ButtonStyle.bordered` (a system style
 ///   with proper hit target and disabled state) — no hand-rolled glass.
 /// - The rotation animation is gated on `accessibilityReduceMotion` so
@@ -41,7 +42,7 @@ public struct RefreshButton: View {
                     value: isLoading
                 )
         }
-        .controlSize(.regular)
+        .controlSize(.small)
         .disabled(isLoading)
         .accessibilityLabel("Refresh")
         // Tooltip teaches the user what the button does and that the

@@ -5,6 +5,35 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.0 (2026-07-30)
+
+---
+
+### Features
+
+- redesigned popover as a 280pt flat two-column Control Center tile: battery percentage (left) and home load kW (right) in a compact hero with tiny secondary labels, matching the macOS Tahoe 26 native popover aesthetic
+- switched to a fully neutral color palette: system semantic colors (`.primary` / `.secondary` / `.tertiary`) plus `Color.accentColor` as the single state signal — no green/orange gradient fills
+- new flat single-surface layout: content renders directly on the Regular Liquid Glass shell with hairline dividers for separation; no opaque inner cards (spec 001's adaptive legibility treatment keeps flat-on-glass content sharp at 280pt)
+- compact 12pt neutral battery bar: thin gauge conveying fill level only; state direction (charging/discharging) moved to an accent-colored label + dot in the state row
+- compact inline state row: accent state badge (`PowerFlowBadgeView`) + freshness trust indicator (`FreshnessIndicatorView`) + compact refresh button (`controlSize(.small)`) in a single horizontal line
+
+### Refactor
+
+- removed the title header ("Growatt Inverter") — the two-column hero identifies the popover; the status bar item carries the app identity
+- removed the separate Home Load `PowerMetricTileView` component; the home consumption value now renders inline in the hero right column with `monospacedDigit()` formatting
+- removed all opaque `controlBackgroundColor` inner card backgrounds (hero, tile, error banner) — content is now flat on the glass shell
+- removed the green/orange gradient stops from `BatteryIndicatorView`; bar uses neutral primary-opacity fills
+- deleted `GlassTokens.Radius.tile` and `GlassTokens.Padding.tile` tokens (no remaining consumer)
+- collapsed `FreshnessIndicatorView` from a standalone capsule pill into a compact inline dot + text indicator
+- flattened `PowerFlowBadgeView` from a tinted-glass capsule into a flat accent label + dot (no glass background)
+- reduced `Numeric.hero` from 44pt to 28pt (compact Control Center tile scale)
+- reduced popover width from 360pt to 280pt, padding from 18pt to 16pt, spacing from 16pt to 12pt
+
+### Removed
+
+- `PowerMetricTileView.swift` — deleted; home consumption now renders inline in the two-column hero row
+- `GlassTokens.Radius.tile` and `GlassTokens.Padding.tile` — deleted; no remaining consumer
+
 ## 0.2.0 (2026-07-29)
 
 ---

@@ -48,6 +48,8 @@ typography:
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: -0.015em
+    # ⚠️ display-sm (44pt) is too large for compact menu-bar popovers (280pt).
+    # Use a ~28pt hero numeric (GlassTokens.Numeric.hero, 28pt bold rounded) instead.
 
   # Headings — SwiftUI native sizes. Use these for popover titles, sheet headers, sidebar headers.
   large-title:
@@ -281,8 +283,8 @@ components:
     backgroundColor: "surface.glass.popover"
     textColor: "{colors.label}"
     rounded: "{rounded.lg}"
-    padding: "{spacing.edge-mac}"
-    width: 320px
+    padding: 16px                             # Standard (320pt) popover; compact (280pt) variant on the same padding
+    width: 320px                              # Standard popover width; compact menu-bar utility popovers (Growatt Toolbar) use a 280pt variant
   popover-ios:
     backgroundColor: "surface.glass.popover"
     textColor: "{colors.label}"
@@ -521,7 +523,7 @@ Top-of-window chrome. `surface.glass.toolbar` with `.containerConcentric` corner
 
 ### Card (Floating)
 
-`surface.glass.card` in a `.xl` continuous rounded rectangle. Used for floating, non-navigational content. **Not** for stacked list rows. Cards never nest inside other cards.
+`surface.glass.card` in a `.xl` continuous rounded rectangle. Used for floating, non-navigational content. **Not** for stacked list rows. Cards never nest inside other cards. For menu-bar popovers (280pt Control Center tile aesthetic), the card pattern is **not used**; flat content rendered directly on the glass shell is preferred.
 
 ### Sheet / Popover
 
@@ -557,7 +559,7 @@ System components — they adopt Liquid Glass automatically when compiled with t
 
 - ✅ Use `.glassEffect(.regular)` as the default and reach for `.clear` only over media-rich content.
 - ✅ Wrap only **adjacent** glass elements that must blend or morph in a `GlassEffectContainer(spacing:)`. The container captures its content into the glass rendering pass — never wrap a content hierarchy, a full-size background glass, or non-glass content. If two glass elements are far apart and never merge, they do not need a container.
-- ✅ For a popover or window shell, use a single `.glassEffect(.regular, in:)` background on the root view with opaque inner cards — no container. This is the "glass shell, opaque content" pattern.
+- ✅ For a popover or window shell, use a single `.glassEffect(.regular, in:)` background on the root view with flat content — no inner cards needed on a compact popover; the Regular variant's adaptive legibility treatment keeps content sharp. This is the "glass shell, flat content" pattern.
 - ✅ Use `RoundedRectangle(cornerRadius: .containerConcentric, style: .continuous)` for anything that should nest with its container.
 - ✅ Reach for `ButtonStyle.glass` / `.glassProminent` before hand-rolling a `Button { }.glassEffect()`.
 - ✅ Use `glassEffectID(_:in:)` with a `Namespace` to morph between collapsed and expanded states.
@@ -566,6 +568,7 @@ System components — they adopt Liquid Glass automatically when compiled with t
 - ✅ Trust system accessibility (Reduced Transparency, Increase Contrast, Reduce Motion, iOS 26.1+ Tinted mode) — do not override it.
 - ✅ Test in light **and** dark appearance, with Increase Contrast on, and at the largest Dynamic Type size.
 - ✅ Use SF Pro tabular numerals (`tnum`) for any value that updates live.
+- ✅ For a menu-bar popover (280pt, Control Center tile aesthetic), render content directly on the Regular glass shell with no inner cards. Use hairline dividers and tight spacing for separation. The glass shell's adaptive legibility treatment keeps flat-on-glass content sharp.
 
 ### Don't
 
@@ -581,3 +584,4 @@ System components — they adopt Liquid Glass automatically when compiled with t
 - ❌ Manually re-implement Reduced Transparency or Increase Contrast. The system does this for `.glassEffect()`.
 - ❌ Animate glass continuously. Steady states should rest; morph only on user-initiated state change.
 - ❌ Use glass over a plain background. The material shines over varied content; on a flat color it looks like a grey rectangle.
+- ❌ Don't use opaque inner cards (controlBackgroundColor) on a menu-bar popover. The Regular glass variant's adaptive legibility treatment handles content legibility; inner cards add visual weight that fights the compact tile aesthetic.
