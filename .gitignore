@@ -19,3 +19,6 @@ Package.resolved
 # Agent / tooling
 .agents/
 .opencode/
+
+# Impeccable skill workflow storage (critique snapshots, config)
+.impeccable/

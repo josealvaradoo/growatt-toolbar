@@ -7,8 +7,16 @@ import SwiftUI
 /// on `.regularMaterial` cards so the text stays legible — no glass-on-glass
 /// stacking. On macOS 15 the same composition falls back to
 /// `.ultraThinMaterial`. Honors `accessibilityReduceTransparency` throughout.
+///
+/// **Honesty layer.** The popover renders one of four `Freshness` states at
+/// all times: `.awaiting` (composed placeholder), `.live` (full hero),
+/// `.stale` (full hero with inline "Updated Nm ago"), `.error` (designed
+/// banner that replaces the hero). The connection pill in the header is the
+/// single source of truth for trust. The footer "Last synced" line was
+/// deleted; its job is now in the hero.
 public struct GrowattPopoverView: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable public var viewModel: InverterViewModel
 
     public init(viewModel: InverterViewModel) {
@@ -16,33 +24,28 @@ public struct GrowattPopoverView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: GlassTokens.Spacing.lg) {
             header
-            heroContent
-            metricsRow
+            heroSection
+            if showsMetricsRow {
+                metricsRow
+            }
             footer
         }
         .padding(GlassTokens.Padding.popover)
-        .frame(width: 360)
+        .frame(width: 360)  // canonical width — see StatusBarController.popover.contentSize
         .background { popoverBackground }
+        // Single shared sampling region for the popover background, the
+        // state badge, and the refresh button. Without this, each glass
+        // surface is computed independently on macOS 26+ and the lensing
+        // / specular highlights look like three separate planes.
+        .glassContainer(spacing: GlassTokens.Spacing.lg)
     }
 
-    @ViewBuilder
-    private var popoverBackground: some View {
-        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.popover, style: .continuous)
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
-        } else if #available(macOS 26, *) {
-            shape
-                .fill(Color.clear)
-                .glassEffect(.clear, in: shape)
-        } else {
-            shape.fill(.ultraThinMaterial)
-        }
-    }
+    // MARK: - Header
 
     private var header: some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text("Growatt Inverter")
                 .font(.title3.bold())
                 .fontDesign(.rounded)
@@ -50,43 +53,89 @@ public struct GrowattPopoverView: View {
 
             Spacer()
 
-            connectionIndicator
+            // TimelineView re-evaluates freshness once per second so the pill
+            // transitions from "Live" to "Stale" without polling the view model.
+            TimelineView(.periodic(from: .now, by: 1)) { _ in
+                FreshnessIndicatorView(freshness: viewModel.freshness)
+            }
         }
     }
 
-    private var connectionIndicator: some View {
-        let isOnline = viewModel.errorMessage == nil
-        let color: Color = isOnline ? .green : .red
+    // MARK: - Hero
 
-        return HStack(spacing: 6) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
-                .shadow(color: color.opacity(0.8), radius: 4)
-
-            Text(isOnline ? "Connected" : "Offline")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    @ViewBuilder
+    private var heroSection: some View {
+        switch viewModel.freshness {
+        case .awaiting:
+            awaitingHero
+        case .live, .stale:
+            dataHero
+        case .error:
+            errorHero
         }
     }
 
-    private var heroContent: some View {
-        VStack(spacing: 16) {
+    private var awaitingHero: some View {
+        VStack(alignment: .leading, spacing: GlassTokens.Spacing.lg) {
+            HStack(alignment: .firstTextBaseline, spacing: GlassTokens.Spacing.xxs) {
+                Text("···")
+                    .font(GlassTokens.Numeric.hero)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Text("%")
+                    .font(.title.bold())
+                    .foregroundStyle(.tertiary)
+            }
+
+            HStack(spacing: GlassTokens.Spacing.md) {
+                Image(systemName: "antenna.radiowaves.left.and.right")
+                    .font(.caption.bold())
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.secondary)
+                Text("Awaiting first reading…")
+                    .font(.caption)
+                    .fontDesign(.rounded)
+                    .foregroundStyle(.secondary)
+            }
+
+            BatteryIndicatorPlaceholder()
+                .frame(height: 38)
+        }
+        .padding(GlassTokens.Padding.card)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background { heroBackground }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Awaiting first reading from inverter")
+    }
+
+    private var dataHero: some View {
+        VStack(alignment: .leading, spacing: GlassTokens.Spacing.lg) {
             HStack(alignment: .top) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text("\(viewModel.status.batterySoC)")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
-                    Text("%")
-                        .font(.title.bold())
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: GlassTokens.Spacing.xxs) {
+                    HStack(alignment: .firstTextBaseline, spacing: GlassTokens.Spacing.xxs) {
+                        Text("\(viewModel.status.batterySoC)")
+                            .font(GlassTokens.Numeric.hero)
+                            .foregroundStyle(.primary)
+                            .monospacedDigit()
+                        Text("%")
+                            .font(.title.bold())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let subtitle = staleSubtitle {
+                        Text(subtitle)
+                            .font(.footnote)
+                            .fontDesign(.rounded)
+                            .foregroundStyle(.orange)
+                            .monospacedDigit()
+                            .transition(staleSubtitleTransition)
+                    }
                 }
 
-                Spacer()
+                Spacer(minLength: GlassTokens.Spacing.sm)
 
                 PowerFlowBadgeView(
-                    state: viewModel.status.state,
-                    powerDescription: viewModel.status.formattedPowerDescription
+                    state: viewModel.status.state
                 )
             }
 
@@ -97,6 +146,92 @@ public struct GrowattPopoverView: View {
         }
         .padding(GlassTokens.Padding.card)
         .background { heroBackground }
+        .animation(staleSubtitleAnimation, value: staleSubtitle)
+        // Combine so VoiceOver reads the percentage, stale subtitle, and
+        // badge as a single utterance instead of descending into the
+        // individual Texts. The custom label includes the stale subtitle
+        // when present so Sam hears the freshness signal in the same
+        // utterance as the reading.
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(dataHeroAccessibilityLabel)
+    }
+
+    /// One-sentence VoiceOver label for the data hero. Composed of the
+    /// battery percentage, the battery state, and the optional stale
+    /// subtitle. Excludes the battery bar (decorative, hidden) and the
+    /// popover freshness pill (the pill's own label carries that info).
+    private var dataHeroAccessibilityLabel: String {
+        let base = "Battery at \(viewModel.status.batterySoC) percent, \(viewModel.status.state.title.lowercased())"
+        if let subtitle = staleSubtitle {
+            return base + ", " + subtitle
+        }
+        return base
+    }
+
+    private var errorHero: some View {
+        ErrorBannerView(viewModel: viewModel)
+    }
+
+    // MARK: - Metrics
+
+    /// Hide the metrics row in states that have no data to show. `.stale`
+    /// still has the last known value, so it stays.
+    private var showsMetricsRow: Bool {
+        switch viewModel.freshness {
+        case .awaiting:           return false
+        case .error where !viewModel.hasReceivedFirstReading: return false
+        default:                  return true
+        }
+    }
+
+    private var metricsRow: some View {
+        PowerMetricTileView(
+            iconName: "house.fill",
+            title: "Home Load",
+            valueKW: viewModel.status.outputPowerKW
+        )
+    }
+
+    // MARK: - Footer
+
+    @ViewBuilder
+    private var footer: some View {
+        // In the `.error` state the recovery affordance lives inside
+        // `ErrorBannerView`. Hiding the footer refresh there avoids a
+        // redundant second button and keeps the hero's banner the single
+        // visual focus.
+        if viewModel.freshness == .error {
+            EmptyView()
+        } else {
+            // The HStack sits inside the popover's VStack; the parent
+            // doesn't expand horizontally, so the button naturally
+            // hugs the leading edge. A trailing `Spacer()` is decorative.
+            refreshButton
+        }
+    }
+
+    // MARK: - Refresh button
+
+    private var refreshButton: some View {
+        RefreshButton(isLoading: viewModel.isLoading) {
+            Task { await viewModel.refreshData() }
+        }
+    }
+
+    // MARK: - Backgrounds
+
+    @ViewBuilder
+    private var popoverBackground: some View {
+        let shape = RoundedRectangle(cornerRadius: PopoverGeometry.cornerRadius, style: .continuous)
+        if reduceTransparency {
+            shape.fill(Color(nsColor: .windowBackgroundColor))
+        } else if #available(macOS 26, *) {
+            shape
+                .fill(Color.clear)
+                .glassEffect(.clear, in: shape)
+        } else {
+            shape.fill(.ultraThinMaterial)
+        }
     }
 
     @ViewBuilder
@@ -109,72 +244,43 @@ public struct GrowattPopoverView: View {
         }
     }
 
-    private var metricsRow: some View {
-        PowerMetricTileView(
-            iconName: "house.fill",
-            title: "Home Load",
-            valueKW: viewModel.status.outputPowerKW
-        )
+    // MARK: - Time-aware copy
+
+    /// Inline subtitle under the percentage in the `.stale` state. `nil`
+    /// in `.live` (the pill carries the trust signal, no caption needed).
+    private var staleSubtitle: String? {
+        guard viewModel.freshness == .stale,
+              let seconds = viewModel.secondsSinceLastUpdate else { return nil }
+        return "Updated \(ErrorBannerView.relativeString(for: seconds))"
     }
 
-    private var footer: some View {
-        HStack {
-            refreshButton
-
-            Spacer()
-
-            Text("Last synced: \(timeAgoString(from: viewModel.status.lastUpdated))")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+    /// Transition for the inline "Updated Nm ago" caption. `nil` under
+    /// `accessibilityReduceMotion` so the text appears instantly.
+    private var staleSubtitleTransition: AnyTransition {
+        if reduceMotion {
+            return .identity
         }
+        return .opacity.combined(with: .move(edge: .top))
     }
 
-    @ViewBuilder
-    private var refreshButton: some View {
-        Button {
-            Task { await viewModel.refreshData() }
-        } label: {
-            Image(systemName: "arrow.clockwise")
-                .font(.body.bold())
-                .frame(width: GlassTokens.ControlSize.button, height: GlassTokens.ControlSize.button)
-                .rotationEffect(.degrees(viewModel.isLoading ? 360 : 0))
-                .animation(
-                    viewModel.isLoading
-                    ? .linear(duration: 1).repeatForever(autoreverses: false)
-                    : .default,
-                    value: viewModel.isLoading
-                )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Refresh")
-        .background { refreshBackground }
+    private var staleSubtitleAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.25)
     }
+}
 
-    @ViewBuilder
-    private var refreshBackground: some View {
-        let shape = Circle()
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
-        } else if #available(macOS 26, *) {
-            shape
-                .fill(Color.clear)
-                .glassEffect(.clear.interactive(), in: shape)
-        } else {
-            shape.fill(.ultraThinMaterial)
-        }
-    }
-
-    private func timeAgoString(from date: Date) -> String {
-        let elapsed = Int(Date().timeIntervalSince(date))
-        if elapsed < 5 {
-            return "Just now"
-        } else if elapsed < 60 {
-            return "\(elapsed) seconds ago"
-        } else {
-            let minutes = elapsed / 60
-            return "\(minutes) \(minutes == 1 ? "minute" : "minutes") ago"
-        }
-    }
+/// Geometric constants for the popover window. Kept local to this
+/// file because the popover is the only surface that uses them.
+///
+/// On macOS 26+, the principled choice would be SwiftUI's
+/// `.containerConcentric` static (applied via
+/// `RoundedRectangle(...).corners(.containerConcentric())`) — it
+/// resolves at runtime to the system window's corner radius, so the
+/// popover's content edge is concentric with the window's bezel. That
+/// API is macOS 26+ only and requires platform branching; the fixed
+/// value below is a reasonable approximation that works on both
+/// macOS 15 and macOS 26+.
+private enum PopoverGeometry {
+    static let cornerRadius: CGFloat = 24
 }
 
 struct GrowattPopoverView_Previews: PreviewProvider {

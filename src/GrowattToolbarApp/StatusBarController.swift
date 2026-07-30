@@ -22,7 +22,7 @@ public final class StatusBarController: NSObject {
     }
 
     private func setupPopover() {
-        popover.contentSize = NSSize(width: 340, height: 210)
+        popover.contentSize = NSSize(width: 360, height: 210)  // canonical width — matches GrowattPopoverView.frame(width:)
         popover.behavior = .transient
         popover.animates = true
         popover.contentViewController = NSHostingController(
