@@ -221,9 +221,13 @@ public struct GrowattPopoverView: View {
         if reduceTransparency {
             shape.fill(Color(nsColor: .windowBackgroundColor))
         } else if #available(macOS 26, *) {
+            // Regular, not Clear: Clear is only for media-rich backdrops with a
+            // dimming layer and bold/bright overlay content (WWDC25-219) and never
+            // applies the adaptive legibility treatment — the header title sits
+            // directly on this shell. Regular keeps every label sharp and vibrant.
             shape
                 .fill(Color.clear)
-                .glassEffect(.clear, in: shape)
+                .glassEffect(.regular, in: shape)
         } else {
             shape.fill(.ultraThinMaterial)
         }
