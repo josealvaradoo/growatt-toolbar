@@ -68,11 +68,14 @@ public struct ErrorBannerView: View {
 
     @ViewBuilder
     private var background: some View {
+        // Opaque card on a glass popover shell. See the matching comment in
+        // `GrowattPopoverView.heroBackground` for the rationale (the previous
+        // `.regularMaterial` blurred the text rendered on top of it).
         let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
         if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         } else {
-            shape.fill(.regularMaterial)
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         }
     }
 

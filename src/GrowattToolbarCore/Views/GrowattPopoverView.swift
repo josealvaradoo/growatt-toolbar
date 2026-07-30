@@ -4,9 +4,9 @@ import SwiftUI
 /// Liquid Glass surface. Per Apple's HIG, glass is reserved for the
 /// navigation layer (this popover background) and the small interactive
 /// controls (the power-flow badge and the refresh button). The content sits
-/// on `.regularMaterial` cards so the text stays legible — no glass-on-glass
-/// stacking. On macOS 15 the same composition falls back to
-/// `.ultraThinMaterial`. Honors `accessibilityReduceTransparency` throughout.
+/// on opaque cards so the text stays sharp — the popover shell is the
+/// translucency layer, not the inner content. On macOS 15 the popover
+/// background falls back to `.ultraThinMaterial`. Honors `accessibilityReduceTransparency` throughout.
 ///
 /// **Honesty layer.** The popover renders one of four `Freshness` states at
 /// all times: `.awaiting` (composed placeholder), `.live` (full hero),
@@ -35,10 +35,13 @@ public struct GrowattPopoverView: View {
         .padding(GlassTokens.Padding.popover)
         .frame(width: 360)  // canonical width — see StatusBarController.popover.contentSize
         .background { popoverBackground }
-        // Single shared sampling region for the popover background, the
-        // state badge, and the refresh button. Without this, each glass
-        // surface is computed independently on macOS 26+ and the lensing
-        // / specular highlights look like three separate planes.
+        // macOS 26 Liquid Glass: the shared sampling region gives the
+        // popover shell and the badge a unified lensing + specular
+        // highlight pass (one coherent glass plane, not three independent
+        // computations). The inner cards are opaque (see `heroBackground`
+        // and `background` in `ErrorBannerView` / `PowerMetricTileView`),
+        // so the container's real-time sampling affects only the glass
+        // surfaces — the type on the opaque cards stays sharp.
         .glassContainer(spacing: GlassTokens.Spacing.lg)
     }
 
@@ -236,11 +239,18 @@ public struct GrowattPopoverView: View {
 
     @ViewBuilder
     private var heroBackground: some View {
+        // Opaque card on a glass popover shell. The previous `.regularMaterial`
+        // applied a real-time blur (NSVisualEffectView) that visibly softened
+        // the text rendered on top. An opaque surface keeps the type sharp and
+        // matches the macOS 26 Tahoe popover pattern (glass shell, opaque
+        // inner cards). Both the RT-on and RT-off branches resolve to the
+        // same opaque surface because the inner cards are *not* a
+        // translucency layer — the popover shell is the translucency layer.
         let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
         if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         } else {
-            shape.fill(.regularMaterial)
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         }
     }
 

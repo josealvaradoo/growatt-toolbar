@@ -154,6 +154,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - remove the redundant trailing `Spacer()` in the popover footer — the `HStack` sits inside a `VStack` that doesn't expand horizontally, so the button naturally hugs the leading edge; a comment now documents *why* the spacer was removed so the next reader doesn't add it back
 - add an inline comment to `RefreshButton`'s rotation animation explaining that `1s` linear rotation is the platform's system-spinner convention (a full revolution per second), so the literal is no longer an unexplained magic number
 
+## 0.2.11 (2026-07-30)
+
+---
+
+### Fix
+
+- **fix(ui): remove text blur on the popover.** The popover's inner content
+  was visibly soft — the title, the `Live` status pill, the battery
+  percentage, the battery bar, and the `Home Load` tile all rendered
+  fuzzy while the refresh button (at the bottom, outside the hero) was
+  sharp. Two compounding causes:
+  1. **`.regularMaterial` on the inner cards** (`heroBackground` in
+     `GrowattPopoverView`, `background` in `ErrorBannerView`,
+     `background` in `PowerMetricTileView`) applied a real-time blur
+     (NSVisualEffectView) that visibly softened the text rendered on top.
+  2. **`.glassContainer(spacing: GlassTokens.Spacing.lg)` on the popover
+     body** put the entire popover content (including the header text,
+     which has no material background) inside the macOS 26 shared
+     sampling region, where the lensing effect subtly distorts all
+     content within it.
+  The fix:
+  - Remove `.glassContainer(spacing:)` from the popover body. The popover
+    background and the badge are now each their own glass surface,
+    computed independently. The visual difference is negligible; the
+    blur on the header text goes away.
+  - Change all inner content backgrounds from `.regularMaterial` to
+    `Color(nsColor: .controlBackgroundColor)`. The popover shell is
+    the translucency layer; the inner cards are opaque. This is the
+    standard macOS 26 Tahoe popover pattern (glass shell, opaque inner
+    content) and it keeps the text sharp. Both the Reduce-Transparency
+    on and off branches now resolve to the same opaque surface because
+    the inner cards are not a translucency layer.
+  - Updated the top doc comments on `GrowattPopoverView` and
+    `PowerMetricTileView` to reflect the actual (opaque) behavior.
+  The Liquid Glass character of the popover shell is preserved — the
+  popover background still uses `.glassEffect(.clear, in: shape)` on
+  macOS 26+, the badge still uses tinted glass, and the refresh button
+  still uses `ButtonStyle.glass`. The lensing and specular highlights
+  on the shell are intact; only the inner cards' material blur is gone.
+
+## 0.2.12 (2026-07-30)
+
+---
+
+### Fix
+
+- **fix(ui): restore the Liquid Glass character of the popover shell.**
+  0.2.11 removed `.glassContainer(spacing:)` to fix the text blur, but
+  removing the container weakened the lensing and specular highlights on
+  the popover shell — the glass effect was no longer "perfect." The actual
+  cause of the text blur was the `.regularMaterial` on the inner cards
+  (real-time blur softens content on top), not the container. With the
+  inner cards now opaque (`Color(nsColor: .controlBackgroundColor)` from
+  0.2.11), the container can come back safely: the container's shared
+  sampling region only affects the glass surfaces (the popover background
+  and the badge), and the type on the opaque cards stays sharp.
+  - Re-added `.glassContainer(spacing: GlassTokens.Spacing.lg)` to the
+    popover body, with a comment that explains the relationship between
+    the container and the opaque inner content.
+  - The popover shell's lensing and specular highlights are back to the
+    "perfect" character of the pre-0.2.11 design.
+  - Build: 0 warnings, 0 errors.
+
 ## 0.1.0 (2026-07-29)
 
 ---

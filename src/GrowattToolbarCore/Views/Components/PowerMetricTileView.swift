@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// Compact glass tile for individual energy metrics (Solar, Grid, Home Load).
-/// Uses `.regularMaterial` so the tile reads as a solid frosted surface on top
-/// of the popover's Liquid Glass background — no glass-on-glass stacking.
-/// Honors `accessibilityReduceTransparency` by switching to a solid
-/// `windowBackgroundColor` fill.
+/// Compact tile for individual energy metrics (Solar, Grid, Home Load).
+/// Uses an opaque `controlBackgroundColor` fill so the tile reads as a solid
+/// surface on top of the popover's Liquid Glass background — the previous
+/// `.regularMaterial` fill applied a real-time blur that visibly softened
+/// the text rendered on top. No glass-on-glass stacking.
+/// Honors `accessibilityReduceTransparency` by switching to the same opaque
+/// surface (the translucency layer is the popover shell, not the tile).
 public struct PowerMetricTileView: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     public let iconName: String
@@ -45,11 +47,14 @@ public struct PowerMetricTileView: View {
 
     @ViewBuilder
     private var background: some View {
+        // Opaque tile on a glass popover shell. See the matching comment in
+        // `GrowattPopoverView.heroBackground` for the rationale (the previous
+        // `.regularMaterial` blurred the text rendered on top of it).
         let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.tile, style: .continuous)
         if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         } else {
-            shape.fill(.regularMaterial)
+            shape.fill(Color(nsColor: .controlBackgroundColor))
         }
     }
 }
