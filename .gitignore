@@ -18,7 +18,10 @@ Package.resolved
 
 # Agent / tooling
 .agents/
+.claude/
 .opencode/
+specs/
+PLAN.md
 
 # Impeccable skill workflow storage (critique snapshots, config)
 .impeccable/
