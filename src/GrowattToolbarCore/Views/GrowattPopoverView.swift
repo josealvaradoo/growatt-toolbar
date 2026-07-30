@@ -35,14 +35,6 @@ public struct GrowattPopoverView: View {
         .padding(GlassTokens.Padding.popover)
         .frame(width: 360)  // canonical width — see StatusBarController.popover.contentSize
         .background { popoverBackground }
-        // macOS 26 Liquid Glass: the shared sampling region gives the
-        // popover shell and the badge a unified lensing + specular
-        // highlight pass (one coherent glass plane, not three independent
-        // computations). The inner cards are opaque (see `heroBackground`
-        // and `background` in `ErrorBannerView` / `PowerMetricTileView`),
-        // so the container's real-time sampling affects only the glass
-        // surfaces — the type on the opaque cards stays sharp.
-        .glassContainer(spacing: GlassTokens.Spacing.lg)
     }
 
     // MARK: - Header
