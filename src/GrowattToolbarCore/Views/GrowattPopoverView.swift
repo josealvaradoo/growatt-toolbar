@@ -1,12 +1,15 @@
 import SwiftUI
 
 /// Main popover view presenting Growatt inverter status inside a macOS Tahoe
-/// Liquid Glass surface. Per Apple's HIG, glass is reserved for the
-/// navigation layer (this popover background) and the small interactive
-/// controls (the power-flow badge and the refresh button). The content sits
-/// on opaque cards so the text stays sharp — the popover shell is the
-/// translucency layer, not the inner content. On macOS 15 the popover
-/// background falls back to `.ultraThinMaterial`. Honors `accessibilityReduceTransparency` throughout.
+/// Liquid Glass surface. The popover shell is a single `.glassEffect(.regular,
+/// in:)` background on the root view — no `GlassEffectContainer` wraps the
+/// content tree (a container captures its content into the glass rendering
+/// pass, which blurs interior content). The header title and freshness pill
+/// sit directly on the Regular glass and receive the system's adaptive
+/// legibility treatment; the hero card, metric tile, and error banner sit on
+/// opaque `controlBackgroundColor` fills so their type stays sharp. On macOS 15
+/// the popover background falls back to `.ultraThinMaterial`. Honors
+/// `accessibilityReduceTransparency` throughout.
 ///
 /// **Honesty layer.** The popover renders one of four `Freshness` states at
 /// all times: `.awaiting` (composed placeholder), `.live` (full hero),

@@ -556,7 +556,8 @@ System components — they adopt Liquid Glass automatically when compiled with t
 ### Do
 
 - ✅ Use `.glassEffect(.regular)` as the default and reach for `.clear` only over media-rich content.
-- ✅ Wrap every group of two or more nearby glass elements in a `GlassEffectContainer(spacing:)`.
+- ✅ Wrap only **adjacent** glass elements that must blend or morph in a `GlassEffectContainer(spacing:)`. The container captures its content into the glass rendering pass — never wrap a content hierarchy, a full-size background glass, or non-glass content. If two glass elements are far apart and never merge, they do not need a container.
+- ✅ For a popover or window shell, use a single `.glassEffect(.regular, in:)` background on the root view with opaque inner cards — no container. This is the "glass shell, opaque content" pattern.
 - ✅ Use `RoundedRectangle(cornerRadius: .containerConcentric, style: .continuous)` for anything that should nest with its container.
 - ✅ Reach for `ButtonStyle.glass` / `.glassProminent` before hand-rolling a `Button { }.glassEffect()`.
 - ✅ Use `glassEffectID(_:in:)` with a `Namespace` to morph between collapsed and expanded states.
@@ -570,6 +571,7 @@ System components — they adopt Liquid Glass automatically when compiled with t
 
 - ❌ Put glass on content. No glass on lists, tables, media, scroll views, or stacked rows.
 - ❌ Stack glass on glass. If two surfaces overlap, the top one is a **fill + vibrancy**, not glass.
+- ❌ Wrap a content hierarchy or a full-size background glass in a `GlassEffectContainer`. The `glassEffect(_:in:)` modifier captures content sent to the container to render — wrapping non-glass content lenses and blurs it.
 - ❌ Mix `.regular` and `.clear` in the same view — they have incompatible lighting models.
 - ❌ Tint every button. Tint is a meaning signal; one per screen.
 - ❌ Replace `.glassEffect()` with `RoundedRectangle().fill(.ultraThinMaterial)` and call it "glass". It's a 2014-era fallback.
