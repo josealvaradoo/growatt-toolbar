@@ -8,7 +8,6 @@ import SwiftUI
 /// Honors `accessibilityReduceTransparency` by switching to the same opaque
 /// surface (the translucency layer is the popover shell, not the tile).
 public struct PowerMetricTileView: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     public let iconName: String
     public let title: String
     public let valueKW: Double
@@ -45,17 +44,10 @@ public struct PowerMetricTileView: View {
         .background { background }
     }
 
-    @ViewBuilder
     private var background: some View {
-        // Opaque tile on a glass popover shell. See the matching comment in
-        // `GrowattPopoverView.heroBackground` for the rationale (the previous
-        // `.regularMaterial` blurred the text rendered on top of it).
-        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.tile, style: .continuous)
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        } else {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        }
+        // Opaque tile on a glass popover shell (see `GrowattPopoverView.heroBackground`).
+        RoundedRectangle(cornerRadius: GlassTokens.Radius.tile, style: .continuous)
+            .fill(Color(nsColor: .controlBackgroundColor))
     }
 }
 

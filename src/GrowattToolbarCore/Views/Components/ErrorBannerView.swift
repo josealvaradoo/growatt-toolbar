@@ -15,7 +15,6 @@ import SwiftUI
 /// reading Nm ago) so they can decide whether the data is still useful
 /// or already a fossil.
 public struct ErrorBannerView: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Bindable public var viewModel: InverterViewModel
 
     public init(viewModel: InverterViewModel) {
@@ -66,17 +65,10 @@ public struct ErrorBannerView: View {
 
     // MARK: - Background
 
-    @ViewBuilder
     private var background: some View {
-        // Opaque card on a glass popover shell. See the matching comment in
-        // `GrowattPopoverView.heroBackground` for the rationale (the previous
-        // `.regularMaterial` blurred the text rendered on top of it).
-        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        } else {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        }
+        // Opaque card on a glass popover shell (see `GrowattPopoverView.heroBackground`).
+        RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
+            .fill(Color(nsColor: .controlBackgroundColor))
     }
 
     // MARK: - Time helper

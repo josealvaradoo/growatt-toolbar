@@ -233,21 +233,12 @@ public struct GrowattPopoverView: View {
         }
     }
 
-    @ViewBuilder
     private var heroBackground: some View {
-        // Opaque card on a glass popover shell. The previous `.regularMaterial`
-        // applied a real-time blur (NSVisualEffectView) that visibly softened
-        // the text rendered on top. An opaque surface keeps the type sharp and
-        // matches the macOS 26 Tahoe popover pattern (glass shell, opaque
-        // inner cards). Both the RT-on and RT-off branches resolve to the
-        // same opaque surface because the inner cards are *not* a
-        // translucency layer — the popover shell is the translucency layer.
-        let shape = RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        } else {
-            shape.fill(Color(nsColor: .controlBackgroundColor))
-        }
+        // Opaque card on a glass popover shell. The popover shell is the only
+        // translucency layer; the inner cards are opaque so the type stays
+        // sharp (macOS 26 Tahoe popover pattern: glass shell, opaque content).
+        RoundedRectangle(cornerRadius: GlassTokens.Radius.card, style: .continuous)
+            .fill(Color(nsColor: .controlBackgroundColor))
     }
 
     // MARK: - Time-aware copy
