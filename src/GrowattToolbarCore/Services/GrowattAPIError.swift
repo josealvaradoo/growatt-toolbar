@@ -6,6 +6,7 @@ public enum GrowattAPIError: Error, Equatable, LocalizedError, Sendable {
     case decodingError(String)
     case unauthorized
     case serverError(statusCode: Int)
+    case keychainError(String)
 
     public var errorDescription: String? {
         switch self {
@@ -17,6 +18,8 @@ public enum GrowattAPIError: Error, Equatable, LocalizedError, Sendable {
             return "Unauthorized API key or token."
         case .serverError(let statusCode):
             return "Server responded with status code \(statusCode)."
+        case .keychainError(let message):
+            return "Keychain error: \(message)"
         }
     }
 }

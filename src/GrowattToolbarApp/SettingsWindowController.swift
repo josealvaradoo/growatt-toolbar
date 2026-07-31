@@ -7,14 +7,21 @@ final class SettingsWindowController: NSObject, @unchecked Sendable {
     private var window: NSWindow?
     private let onSave: (String, String) async throws -> Void
 
-    init(onSave: @escaping (String, String) async throws -> Void) {
+    init(
+        initialApiKey: String? = nil,
+        initialApiURL: String? = nil,
+        onSave: @escaping (String, String) async throws -> Void
+    ) {
         self.onSave = onSave
         super.init()
-        setupWindow()
+        setupWindow(initialApiKey: initialApiKey, initialApiURL: initialApiURL)
     }
 
-    private func setupWindow() {
-        let settingsView = SettingsView { [weak self] apiKey, apiURL in
+    private func setupWindow(initialApiKey: String?, initialApiURL: String?) {
+        let settingsView = SettingsView(
+            initialApiKey: initialApiKey,
+            initialApiURL: initialApiURL
+        ) { [weak self] apiKey, apiURL in
             try await self?.onSave(apiKey, apiURL)
             self?.closeWindow()
         }

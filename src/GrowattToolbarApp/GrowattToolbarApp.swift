@@ -17,24 +17,24 @@ struct GrowattToolbarApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController?
     private var settingsWindowController: SettingsWindowController?
+    private let prefs = AppPreferences()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+#if DEBUG
         DotEnv.loadDotenv()
+#endif
 
-        let processInfo = ProcessInfo.processInfo
         let defaults = UserDefaults.standard
 
-        if defaults.bool(forKey: "hasCompletedOnboarding") {
-            let apiKey = defaults.string(forKey: "apiKey") ?? processInfo.environment["API_KEY"] ?? ""
-            let apiURL = defaults.string(forKey: "apiURL") ?? processInfo.environment["API_URL"] ?? ""
-            finishSetup(apiKey: apiKey, apiURL: apiURL)
+        if defaults.bool(forKey: "hasCompletedOnboarding"), prefs.hasCredentials {
+            finishSetup(apiKey: prefs.apiKey, apiURL: prefs.apiURL)
             NSApp.setActivationPolicy(.accessory)
         } else {
             let onboarding = SettingsWindowController { [weak self] apiKey, apiURL in
+                guard let self else { return }
+                try self.prefs.save(apiKey: apiKey, apiURL: apiURL)
                 defaults.set(true, forKey: "hasCompletedOnboarding")
-                defaults.set(apiKey, forKey: "apiKey")
-                defaults.set(apiURL, forKey: "apiURL")
-                self?.finishSetup(apiKey: apiKey, apiURL: apiURL)
+                self.finishSetup(apiKey: apiKey, apiURL: apiURL)
                 NSApp.setActivationPolicy(.accessory)
             }
             self.settingsWindowController = onboarding
@@ -58,13 +58,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func reopenSettings() {
-        if settingsWindowController == nil {
-            settingsWindowController = SettingsWindowController { [weak self] apiKey, apiURL in
-                let defaults = UserDefaults.standard
-                defaults.set(apiKey, forKey: "apiKey")
-                defaults.set(apiURL, forKey: "apiURL")
-                self?.finishSetup(apiKey: apiKey, apiURL: apiURL)
-            }
+        settingsWindowController?.closeWindow()
+        settingsWindowController = SettingsWindowController(
+            initialApiKey: prefs.apiKey,
+            initialApiURL: prefs.apiURL
+        ) { [weak self] apiKey, apiURL in
+            guard let self else { return }
+            try self.prefs.save(apiKey: apiKey, apiURL: apiURL)
+            self.finishSetup(apiKey: apiKey, apiURL: apiURL)
         }
         settingsWindowController?.showWindow()
     }

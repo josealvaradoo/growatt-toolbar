@@ -1,15 +1,21 @@
 import SwiftUI
 
 public struct SettingsView: View {
-    @State private var apiKey: String = ""
-    @State private var apiURL: String = ""
+    @State private var apiKey: String
+    @State private var apiURL: String
     @State private var isSaving: Bool = false
     @State private var errorMessage: String? = nil
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     let onSave: (String, String) async throws -> Void
 
-    public init(onSave: @escaping (String, String) async throws -> Void) {
+    public init(
+        initialApiKey: String? = nil,
+        initialApiURL: String? = nil,
+        onSave: @escaping (String, String) async throws -> Void
+    ) {
+        self._apiKey = State(initialValue: initialApiKey ?? "")
+        self._apiURL = State(initialValue: initialApiURL ?? "")
         self.onSave = onSave
     }
 

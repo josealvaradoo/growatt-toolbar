@@ -5,6 +5,23 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0 (2026-07-31)
+
+---
+
+### Added
+
+- `KeychainManager` — macOS Keychain Services wrapper (`SecItemAdd`/`SecItemUpdate`/`SecItemCopyMatching`/`SecItemDelete`) with `kSecAttrAccessibleWhenUnlocked` and iCloud sync disabled.
+- `AppPreferences` — `@MainActor` unified credentials façade: API key from Keychain, API URL from `UserDefaults`, with `#if DEBUG` `.env` fallback.
+- `GrowattAPIError.keychainError` case for typed Keychain failures.
+- Settings fields pre-filled with current credentials when reopening.
+
+### Changed
+
+- `.env` loading (`DotEnv.loadDotenv()`) gated behind `#if DEBUG` — not called in release builds.
+- `hasCompletedOnboarding` flag set only after successful Keychain write (prevents stale state on save failure).
+- Settings window re-created fresh on each reopen (not reused) to always show current credentials.
+
 ## 0.4.0 (2026-07-31)
 
 ---
