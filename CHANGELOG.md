@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AppPreferences` — `@MainActor` unified credentials façade: API key from Keychain, API URL from `UserDefaults`, with `#if DEBUG` `.env` fallback.
 - `GrowattAPIError.keychainError` case for typed Keychain failures.
 - Settings fields pre-filled with current credentials when reopening.
+- `Makefile` with `build`, `app`, `dmg`, `clean` targets for automated release packaging.
+- `Resources/Info.plist` — static bundle metadata for `.app` assembly (LSUIElement, LSMinimumSystemVersion 15.0, etc.).
+- Ad-hoc codesigning via `codesign --force --deep --sign -` and DMG packaging via `hdiutil` (compressed UDZO format).
 
 ### Changed
 
