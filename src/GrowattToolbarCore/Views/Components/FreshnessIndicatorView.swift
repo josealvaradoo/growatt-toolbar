@@ -4,12 +4,14 @@ import SwiftUI
 /// inverter reading. Rendered as an unadorned dot + text pair — no background
 /// capsule — so it blends into the parent surface (the popover's glass shell).
 ///
-/// Four states:
+/// The dot is a binary trust signal in Apple's system colors: green while the
+/// reading is `live`, red for every other category (awaiting / stale / error).
+/// Copy still differentiates the non-live categories:
 ///
-/// - awaiting: pulsing neutral dot + "Connecting…"
-/// - live:     steady green dot  + "Live"
-/// - stale:    steady amber dot  + "Stale"
-/// - error:    steady red dot    + "Offline"
+/// - awaiting: pulsing red dot  + "Connecting…"
+/// - live:     steady green dot + "Live"
+/// - stale:    steady red dot   + "Stale"
+/// - error:    steady red dot   + "Offline"
 ///
 /// The dot's pulse animation uses SwiftUI's built-in `.symbolEffect(.pulse)`
 /// on the leading SF Symbol — Apple handles Reduce Motion automatically.
@@ -45,17 +47,12 @@ struct FreshnessIndicatorView: View {
             ))
     }
 
-    /// Freshness dot uses semantic colours (green/amber/red) because
-    /// freshness is a trust axis. The state signal (charging/discharging)
-    /// in `PowerFlowBadgeView` uses the system accent only — the two
-    /// axes are intentionally independent per the design spec.
+    /// Binary trust signal in Apple Design System colors: `systemGreen` while
+    /// live, `systemRed` for any degraded category. The state signal
+    /// (charging/discharging) in `PowerFlowBadgeView` uses the accent only —
+    /// the two axes are intentionally independent per the design spec.
     private var tint: Color {
-        switch freshness {
-        case .awaiting: return .secondary
-        case .live:     return .green
-        case .stale:    return .orange
-        case .error:    return .red
-        }
+        freshness == .live ? .green : .red
     }
 }
 
