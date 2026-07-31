@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// A thin, neutral battery gauge — a Control Center tile that shows state of
-/// charge only (how full), not state direction (charging vs. discharging).
-/// The fill and track use system-neutral opacities so the bar reads as a
-/// gauge rather than a status indicator; state direction is conveyed by the
-/// accent label in the parent state row, never by bar colour.
+/// A thin battery gauge — a Control Center tile that shows state of charge
+/// (how full), not state direction (charging vs. discharging).
+///
+/// The fill is tinted by level: green (the same green as the charging dot)
+/// while the battery sits at or above 60%, shifting to orange below that
+/// threshold so the gauge reads as a level alarm at a glance. Direction is
+/// still conveyed by the accent label in the parent state row.
 ///
 /// The fill-width spring animation is gated on `accessibilityReduceMotion` —
 /// users who opt out of motion still see the new level communicated through
@@ -17,6 +19,13 @@ public struct BatteryIndicatorView: View {
     public init(levelPercentage: Int, state: InverterState) {
         self.levelPercentage = min(max(levelPercentage, 0), 100)
         self.state = state
+    }
+
+    /// Green while at or above the 60% alert threshold, orange below it —
+    /// mirrors the charging/dot accent so the bar stays in the same
+    /// semantic color vocabulary as the state row.
+    private var fillColor: Color {
+        levelPercentage >= 60 ? .green : .orange
     }
 
     /// `nil` when `accessibilityReduceMotion` is on — passing `nil` to
@@ -33,7 +42,7 @@ public struct BatteryIndicatorView: View {
                     .fill(.primary.opacity(0.12))
 
                 RoundedRectangle(cornerRadius: BatteryGeometry.fillCornerRadius, style: .continuous)
-                    .fill(.primary.opacity(0.6))
+                    .fill(fillColor)
                     .frame(width: max(0, (geometry.size.width - BatteryGeometry.fillInset * 2) * CGFloat(levelPercentage) / 100.0))
                     .padding(BatteryGeometry.fillInset)
                     .animation(levelAnimation, value: levelPercentage)
