@@ -8,6 +8,8 @@
 	<string>com.growatt.toolbar</string>
 	<key>CFBundleName</key>
 	<string>Growatt Toolbar</string>
+	<key>CFBundleIconFile</key>
+	<string>Growatt Toolbar</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleVersion</key>
