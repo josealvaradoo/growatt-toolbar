@@ -1,14 +1,15 @@
-.PHONY: build app dmg clean all
+.PHONY: build icons app dmg clean all
 
 APP_NAME := GrowattToolbarApp
 BUNDLE_NAME := Growatt Toolbar
 DMG_NAME := GrowattToolbar
 VERSION := 0.5.0
 BUILD_DIR := .build/release
-APP_BUNDLE := $(BUNDLE_NAME).app
-DMG_FILE := $(DMG_NAME).dmg
-ICONSET_DIR := $(BUNDLE_NAME).iconset
-ICNS_FILE := $(BUNDLE_NAME).icns
+DIST_DIR := dist
+APP_BUNDLE := $(DIST_DIR)/$(BUNDLE_NAME).app
+DMG_FILE := $(DIST_DIR)/$(DMG_NAME).dmg
+ICONSET_DIR := $(DIST_DIR)/$(BUNDLE_NAME).iconset
+ICNS_FILE := $(DIST_DIR)/$(BUNDLE_NAME).icns
 
 build:
 	@echo "==> Building $(APP_NAME) in release configuration..."
@@ -17,6 +18,7 @@ build:
 
 icons:
 	@echo "==> Generating app icon..."
+	mkdir -p "$(DIST_DIR)"
 	rm -rf "$(ICONSET_DIR)"
 	mkdir -p "$(ICONSET_DIR)"
 	sips -z 16 16   Resources/Growatt-G.png --out "$(ICONSET_DIR)/icon_16x16.png"
@@ -34,6 +36,7 @@ icons:
 
 app: build icons
 	@echo "==> Assembling $(APP_BUNDLE)..."
+	mkdir -p "$(DIST_DIR)"
 	mkdir -p "$(APP_BUNDLE)/Contents/MacOS"
 	mkdir -p "$(APP_BUNDLE)/Contents/Resources"
 	cp "$(BUILD_DIR)/$(APP_NAME)" "$(APP_BUNDLE)/Contents/MacOS/"
@@ -52,10 +55,7 @@ dmg: app
 clean:
 	@echo "==> Cleaning..."
 	rm -rf .build
-	rm -rf "$(APP_BUNDLE)"
-	rm -f "$(DMG_FILE)"
-	rm -rf "$(ICONSET_DIR)"
-	rm -f "$(ICNS_FILE)"
+	rm -rf "$(DIST_DIR)"
 	@echo "==> Clean complete."
 
 all: dmg
