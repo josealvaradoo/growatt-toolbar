@@ -8,9 +8,11 @@ import SwiftUI
 /// and `accessibilityReduceMotion` throughout.
 ///
 /// **Honesty layer.** The popover renders one of four `Freshness` states at
-/// all times: `.awaiting` (placeholder columns + "Connecting…"), `.live` / `.stale`
-/// (two-column hero + bar + state row with inline freshness), `.error`
-/// (compact banner replacing the hero). The state row's `FreshnessIndicatorView`
+/// all times: `.awaiting` (placeholder columns + "Connecting…"), `.live` /
+/// `.stale` (two-column hero + bar + state row with inline freshness), `.error`
+/// (compact banner replacing the hero; battery bar, divider, and state row
+/// are suppressed). Hero transitions use a 250ms ease-in-out crossfade
+/// for a calm state change. The state row's `FreshnessIndicatorView`
 /// is the single source of truth for trust.
 public struct GrowattPopoverView: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
@@ -24,13 +26,16 @@ public struct GrowattPopoverView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: GlassTokens.Spacing.md) {
             heroSection
-            batteryBarSection
-            Divider()
-            stateRow
+            if viewModel.freshness != .error {
+                batteryBarSection
+                Divider()
+                stateRow
+            }
         }
         .padding(GlassTokens.Padding.popover)
         .frame(width: 280)
         .background { popoverBackground }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.freshness)
     }
 
     private var formattedHomeLoad: String {

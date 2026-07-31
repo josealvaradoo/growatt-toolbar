@@ -5,6 +5,18 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.4 (2026-07-30)
+
+---
+
+### Refactor
+
+- error banner: remove internal padding so it sits at the popover's shell inset instead of creating a double-padded card-within-card illusion
+- error banner: differentiate subtitle per error type — "Check API key" for unauthorized, "Last reading Nm ago" for transient errors
+- error banner: center-align the icon against the two-line text block instead of top-aligning
+- popover: hide battery bar, divider, and state row in error state to eliminate dead vertical space and redundant divider
+- popover: add 250ms ease-in-out crossfade on hero freshness transitions
+
 ## 0.3.3 (2026-07-30)
 
 ---

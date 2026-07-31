@@ -2,12 +2,15 @@ import SwiftUI
 
 /// Compact flat error indicator shown in the popover hero when the most
 /// recent poll failed. Renders directly on the parent popover's glass
-/// surface (no card background). Replaces the hero's percentage / state /
-/// battery bar with a single, composed affordance:
+/// surface (no card background) — the popover's 16pt shell padding is
+/// the only inset. Replaces the hero's percentage / state / battery bar
+/// with a composed affordance:
 ///
 ///   - Row 1: Energy-specific icon (`bolt.slash.fill`), "Can't reach
-///     inverter" headline, "Last reading Nm ago" subtitle (or "No previous
-///     reading" if the first poll has not yet succeeded)
+///     inverter" headline, and a context-aware subtitle: "Check API key"
+///     for `.unauthorized` errors, "Last reading Nm ago" for transient
+///     errors, or "No previous reading" if the first poll has not yet
+///     succeeded
 ///   - Divider, then a `RefreshButton` aligned to the trailing edge —
 ///     the single recovery affordance, separated from the message
 ///
@@ -24,7 +27,7 @@ public struct ErrorBannerView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: GlassTokens.Spacing.sm) {
-            HStack(alignment: .top, spacing: GlassTokens.Spacing.md) {
+            HStack(alignment: .center, spacing: GlassTokens.Spacing.md) {
                 Image(systemName: "bolt.slash.fill")
                     .font(.title2)
                     .symbolRenderingMode(.hierarchical)
@@ -55,13 +58,15 @@ public struct ErrorBannerView: View {
                 }
             }
         }
-        .padding(GlassTokens.Padding.card)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Can't reach inverter. \(subtitle). Refresh button.")
     }
 
     private var subtitle: String {
+        if case .unauthorized = viewModel.error {
+            return "Check API key"
+        }
         if let seconds = viewModel.secondsSinceLastUpdate {
             return "Last reading \(Self.relativeString(for: seconds))"
         }
