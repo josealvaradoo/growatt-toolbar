@@ -5,11 +5,11 @@ import SwiftUI
 /// surface (no card background). Replaces the hero's percentage / state /
 /// battery bar with a single, composed affordance:
 ///
-///   - Energy-specific icon (`bolt.slash.fill`)
-///   - "Can't reach inverter" headline
-///   - "Last reading Nm ago" subtitle (or "No previous reading" if the
-///     first poll has not yet succeeded)
-///   - Inline `RefreshButton`, the single recovery affordance
+///   - Row 1: Energy-specific icon (`bolt.slash.fill`), "Can't reach
+///     inverter" headline, "Last reading Nm ago" subtitle (or "No previous
+///     reading" if the first poll has not yet succeeded)
+///   - Divider, then a `RefreshButton` aligned to the trailing edge —
+///     the single recovery affordance, separated from the message
 ///
 /// The banner reads as a designed state, not an alert, and gives the user
 /// both the *what* (couldn't reach the inverter) and the *when* (last
@@ -23,31 +23,36 @@ public struct ErrorBannerView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .top, spacing: GlassTokens.Spacing.md) {
-            Image(systemName: "bolt.slash.fill")
-                .font(.title2)
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.orange)
-                .frame(width: 28, height: 28)
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: GlassTokens.Spacing.sm) {
+            HStack(alignment: .top, spacing: GlassTokens.Spacing.md) {
+                Image(systemName: "bolt.slash.fill")
+                    .font(.title2)
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.orange)
+                    .frame(width: 28, height: 28)
+                    .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: GlassTokens.Spacing.xs) {
-                Text("Can't reach inverter")
-                    .font(.headline)
-                    .fontDesign(.rounded)
-                    .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: GlassTokens.Spacing.xs) {
+                    Text("Can't reach inverter")
+                        .font(.headline)
+                        .fontDesign(.rounded)
+                        .foregroundStyle(.primary)
 
-                Text(subtitle)
-                    .font(.subheadline)
-                    .fontDesign(.rounded)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .fontDesign(.rounded)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
             }
 
-            Spacer(minLength: GlassTokens.Spacing.sm)
+            Divider()
 
-            RefreshButton(isLoading: viewModel.isLoading) {
-                Task { await viewModel.refreshData() }
+            HStack {
+                Spacer(minLength: GlassTokens.Spacing.sm)
+                RefreshButton(isLoading: viewModel.isLoading) {
+                    Task { await viewModel.refreshData() }
+                }
             }
         }
         .padding(GlassTokens.Padding.card)
