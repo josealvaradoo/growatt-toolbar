@@ -5,6 +5,25 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.0 (2026-07-31)
+
+---
+
+### Added
+
+- Settings/onboarding window: native macOS window (`SettingsView` + `SettingsWindowController`) for entering API key and URL. Shows automatically on first launch, reopenable via right-click → "Settings…" on the status bar item.
+- Right-click context menu on status bar item with "Settings…" and "Quit" actions.
+- Credentials now persist across launches via `UserDefaults` (`apiKey`, `apiURL` keys) after onboarding completes, with `.env` as a fallback.
+- Full accessibility labels and hints on all settings form controls.
+- macOS 26 Liquid Glass `.glassEffect()` background on settings window with `.ultraThinMaterial` fallback on macOS 15.
+
+### Changed
+
+- `AppDelegate` now detects first launch (`hasCompletedOnboarding` flag) and routes to onboarding or straight to menu bar mode.
+- `StatusBarController` now exposes `viewModel` as `private(set)` for lifecycle management on re-save.
+- `StatusBarController.deinit` cleans up the `NSStatusItem` via `NSStatusBar.system.removeStatusItem` to prevent leaks on settings re-save.
+- `finishSetup()` calls `viewModel.stopAutoRefresh()` on the old controller before replacing it.
+
 ## 0.3.4 (2026-07-30)
 
 ---
