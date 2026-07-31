@@ -41,7 +41,7 @@ public final class InverterViewModel {
     private var inFlightRefresh: Task<Void, Never>?
 
     public init(
-        service: GrowattAPIServiceProtocol = GrowattOpenAPIService(),
+        service: GrowattAPIServiceProtocol,
         freshnessWindow: TimeInterval = 180
     ) {
         self.apiService = service

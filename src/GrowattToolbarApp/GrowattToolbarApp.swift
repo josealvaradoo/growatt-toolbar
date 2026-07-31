@@ -18,10 +18,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Initialize Status Bar Controller & Menu Bar Popover
-        let apiToken = ProcessInfo.processInfo.environment["GROWATT_API_KEY"] ?? ""
+        DotEnv.loadDotenv()
+
+        let processInfo = ProcessInfo.processInfo
+        let apiToken = processInfo.environment["API_KEY"] ?? ""
+        let baseURL  = processInfo.environment["API_URL"] ?? ""
+
         let service = GrowattOpenAPIService(
-            baseURLString: "http://localhost:3000",
+            baseURLString: baseURL,
             apiToken: apiToken
         )
         let viewModel = InverterViewModel(service: service)

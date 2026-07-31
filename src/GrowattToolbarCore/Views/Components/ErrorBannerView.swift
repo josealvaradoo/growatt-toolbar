@@ -77,7 +77,7 @@ public struct ErrorBannerView: View {
 struct ErrorBannerView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: GlassTokens.Spacing.xl) {
-            ErrorBannerView(viewModel: InverterViewModel())
+            ErrorBannerView(viewModel: InverterViewModel(service: MockGrowattAPIService()))
                 .frame(width: 280)
         }
         .padding()

@@ -25,3 +25,6 @@ PLAN.md
 
 # Impeccable skill workflow storage (critique snapshots, config)
 .impeccable/
+
+# Environment (secrets)
+.env

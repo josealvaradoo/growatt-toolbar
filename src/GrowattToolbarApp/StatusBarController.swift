@@ -9,7 +9,7 @@ public final class StatusBarController: NSObject {
     private var popover: NSPopover
     private let viewModel: InverterViewModel
 
-    public init(viewModel: InverterViewModel = InverterViewModel()) {
+    public init(viewModel: InverterViewModel) {
         self.viewModel = viewModel
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.popover = NSPopover()

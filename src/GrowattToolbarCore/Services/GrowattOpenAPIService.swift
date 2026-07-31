@@ -8,11 +8,14 @@ public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
     private let session: URLSession
 
     public init(
-        baseURLString: String = "http://localhost:3000",
-        apiToken: String = "",
+        baseURLString: String,
+        apiToken: String,
         session: URLSession = .shared
     ) {
-        self.baseURL = URL(string: baseURLString) ?? URL(string: "http://localhost:3000")!
+        guard let url = URL(string: baseURLString), !baseURLString.isEmpty else {
+            fatalError("GrowattOpenAPIService: invalid or missing baseURLString")
+        }
+        self.baseURL = url
         self.apiToken = apiToken
         self.session = session
     }

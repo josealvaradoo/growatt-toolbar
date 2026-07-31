@@ -206,7 +206,7 @@ struct GrowattPopoverView_Previews: PreviewProvider {
             )
             .ignoresSafeArea()
 
-            GrowattPopoverView(viewModel: InverterViewModel())
+            GrowattPopoverView(viewModel: InverterViewModel(service: MockGrowattAPIService()))
         }
     }
 }
