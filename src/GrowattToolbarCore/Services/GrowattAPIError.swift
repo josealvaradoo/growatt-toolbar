@@ -22,4 +22,24 @@ public enum GrowattAPIError: Error, Equatable, LocalizedError, Sendable {
             return "Keychain error: \(message)"
         }
     }
+
+    /// Safe, user-facing message for this error.
+    ///
+    /// The settings flow renders exactly this copy and nothing else, so
+    /// technical details, status codes, and credential values never reach
+    /// the UI, accessibility announcements, or logs.
+    public var safeUserMessage: String {
+        switch self {
+        case .unauthorized:
+            return "The API key was rejected. Check the key and try again."
+        case .networkError:
+            return "The API could not be reached. Check the URL and network connection."
+        case .decodingError:
+            return "The endpoint returned an unexpected response."
+        case .serverError:
+            return "The API server is unavailable right now. Try again later."
+        case .keychainError:
+            return "The credentials could not be saved securely. Try again."
+        }
+    }
 }

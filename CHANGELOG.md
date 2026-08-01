@@ -5,6 +5,30 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.0 (2026-08-01)
+
+---
+
+### Added
+
+- Redesigned settings/onboarding experience: native `NavigationSplitView` sidebar shell with a solid adaptive system background (`SettingsView`, `SettingsSidebarView`).
+- Distinct onboarding experience (`OnboardingContentView`) with welcome copy, value proposition, credential explanation, setup progress, and a prominent CTA; settings mode omits marketing copy and prefills current values.
+- `SettingsMode` (onboarding/settings) and `SettingsSection` (extensible sidebar destination model).
+- `GrowattConnectionTesterProtocol` + `GrowattConnectionTester` — temporary service that calls `/status` with draft credentials and never persists.
+- `SettingsViewModel` (`@Observable @MainActor`) — draft validation, tested-value invalidation tied to exact normalized values, loading state with duplicate-operation prevention, safe error mapping, and save orchestration.
+- `ConnectionFormView` and `ConnectionStatusView` — SecureField + URL field, validation feedback, Test Connection, Save/Update, and loading/success/error states.
+- `GrowattAPIError.safeUserMessage` — fixed, credential-free user-facing copy for every typed error.
+- Test target `GrowattToolbarCoreTests` with `SettingsViewModelTests`, `GrowattConnectionTesterTests` (URLProtocol-mocked transport), and `MockConnectionTester` test double.
+- Mode-aware `SettingsWindowController` — fixed native window, normal titlebar, onboarding close/Escape explains setup is required, returning-settings close with unsaved edits requests confirmation.
+
+### Changed
+
+- `GrowattOpenAPIService` initializer now throws a typed `GrowattAPIError` instead of `fatalError` for invalid base URLs; all call sites updated.
+- Settings window uses a solid adaptive system background everywhere — the floating rounded glass rectangle is gone; no macOS 26-only APIs in the settings stack.
+- Save/Update requires a successful connection test against the exact current draft values before persistence.
+- `AppDelegate` lifecycle: onboarding completion marks onboarding complete and starts the status-bar service; settings saves reconfigure the runtime service; failed persistence does neither.
+- `PRODUCT.md` updated — the obsolete "no settings window" constraint is removed.
+
 ## 0.5.2 (2026-07-31)
 
 ---

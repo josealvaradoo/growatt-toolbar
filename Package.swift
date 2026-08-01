@@ -22,6 +22,11 @@ let package = Package(
             resources: [
                 .process("Resources")
             ]
+        ),
+        .testTarget(
+            name: "GrowattToolbarCoreTests",
+            dependencies: ["GrowattToolbarCore"],
+            path: "Tests/GrowattToolbarCoreTests"
         )
     ]
 )

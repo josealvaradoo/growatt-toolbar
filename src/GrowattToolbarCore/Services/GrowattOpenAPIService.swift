@@ -7,13 +7,26 @@ public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
     private let apiToken: String
     private let session: URLSession
 
+    /// Constructs a service for the given base URL and API token.
+    ///
+    /// Throws `GrowattAPIError.networkError` when the base URL string is
+    /// missing, unparseable, lacks an `http`/`https` scheme, or has no host,
+    /// so invalid draft URLs become typed failures instead of runtime traps.
+    /// The API token is never included in the thrown error.
     public init(
         baseURLString: String,
         apiToken: String,
         session: URLSession = .shared
-    ) {
-        guard let url = URL(string: baseURLString), !baseURLString.isEmpty else {
-            fatalError("GrowattOpenAPIService: invalid or missing baseURLString")
+    ) throws {
+        let trimmed = baseURLString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed), !trimmed.isEmpty else {
+            throw GrowattAPIError.networkError("Invalid or missing API URL")
+        }
+        guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else {
+            throw GrowattAPIError.networkError("API URL must use http or https")
+        }
+        guard let host = url.host, !host.isEmpty else {
+            throw GrowattAPIError.networkError("API URL must include a host")
         }
         self.baseURL = url
         self.apiToken = apiToken

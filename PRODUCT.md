@@ -53,8 +53,10 @@ macOS 26+), is the position.
 ## Operating Context
 
 - **Surface:** the **macOS menu bar**, anchored to a single `NSStatusItem`
-  with a transient `NSPopover`. The popover is the only window the product
-  ever opens.
+  with a transient `NSPopover`. A native settings window (sidebar-style
+  `NavigationSplitView`) is the only other window the product ever opens —
+  it appears automatically on first launch as onboarding and on demand from
+  the status bar's right-click menu for returning users.
 - **Environment:** the user's primary Mac, sitting at a desk, screen on,
   usually with other apps in the foreground. The menu bar is always visible.
 - **Cadence:** the user glances at the menu bar many times a day. The popover
@@ -64,9 +66,10 @@ macOS 26+), is the position.
   these — it complements them by reducing how often the user needs to open
   them.
 - **Deployment:** local macOS executable, run from `swift run
-  GrowattToolbarApp`. The runtime reads the API key from the
-  `GROWATT_API_KEY` environment variable; production credentials are planned
-  for Keychain Services (per `AGENTS.md`).
+  GrowattToolbarApp`. Credentials are entered in the onboarding/settings
+  window: the API key is stored in Keychain Services and the API URL in
+  `UserDefaults`. The `GROWATT_API_KEY` environment variable remains a
+  debug-time fallback for local development (per `AGENTS.md`).
 
 ## Capabilities and Constraints
 
@@ -81,13 +84,19 @@ macOS 26+), is the position.
   in the popover.
 - Show a single metric tile for "Home Load" in the popover.
 - Refresh on a polling cadence driven by the view model.
-- Run as an `.accessory` macOS app (no Dock icon).
+- Run as an `.accessory` macOS app (no Dock icon) once setup completes.
+- Present a native settings/onboarding window on first launch and from the
+  status bar menu, backed by a `NavigationSplitView` sidebar.
+- Test draft credentials against `/status` before persisting them (a
+  successful test is required before Save/Update is enabled).
+- Persist the API key in Keychain Services and the API URL in
+  `UserDefaults`, with the connection test never touching persistence.
 
 ### Confirmed constraints
 
-- **Single popover surface only.** The menu bar item + the popover is the
-  whole product. No settings window, no dashboard, no history, no charts.
-  This is a hard constraint recorded by the user during init.
+- **Two surfaces: the menu bar popover and the settings window.** The
+  popover is the glanceable surface; the settings/onboarding window is the
+  only other window. No dashboard, no history, no charts.
 - **Backend contract is fixed.** The 3-field `/status` payload is the only
   data source. Future work must design within these fields, not invent new
   server fields.
@@ -97,8 +106,10 @@ macOS 26+), is the position.
 - **Zero third-party dependencies.** All UI, networking, and state management
   use Apple system frameworks (SwiftUI, AppKit, Foundation). This is a
   deliberate constraint, recorded in `AGENTS.md`.
-- **Secrets never committed.** The runtime API key is read from
-  `GROWATT_API_KEY`; production credentials are planned for Keychain Services.
+- **Secrets never committed.** Credentials are entered at runtime in the
+  settings window; the API key is persisted in Keychain Services and never
+  logged, copied to `UserDefaults`, or included in errors or accessibility
+  text. `GROWATT_API_KEY` remains a debug-only environment fallback.
 - **No use of `ObservableObject` / `@Published`.** New code uses the
   `@Observable` macro and `@State` / `@Bindable` (per `AGENTS.md`).
 - **One type per file** in the `GrowattToolbarCore` library. No file holds
@@ -107,10 +118,9 @@ macOS 26+), is the position.
 
 ### Open decisions
 
-- The final long-term secret store (Keychain vs. signed env-var at launch).
 - Whether the popover will ever grow additional tiles (solar production, grid
-  flow). Recorded as open; the current constraint is "single popover surface
-  only," but the user may revisit this.
+  flow). Recorded as open; the popover is currently a single glanceable
+  surface, but the user may revisit this.
 - The product icon. None defined yet. The asset catalog exists at
   `src/GrowattToolbarApp/Resources/Assets.xcassets/` and is empty.
 
@@ -142,6 +152,9 @@ oversight — a personal tool for a single user does not need a brand.
 - `src/GrowattToolbarCore/Views/Components/GlassTokens.swift` — the
   centralized Liquid Glass tokens used by the popover and its sub-views
   (radii, padding, control sizes).
+- `src/GrowattToolbarCore/ViewModels/SettingsViewModel.swift` — the
+  settings/onboarding state machine (draft validation, connection testing,
+  safe error mapping, persistence boundaries).
 - `DESIGN.md` (Apple Liquid Glass) — the design system tokens, components,
   and do's-and-don'ts already in place. Recorded by an earlier session.
 
@@ -150,8 +163,9 @@ oversight — a personal tool for a single user does not need a brand.
 1. **At-a-glance, not in-your-face.** The menu bar item is a glance; the
    popover is a deliberate look. Both should resolve in under one second and
    never demand attention.
-2. **The menu bar is the surface.** No second window, no Dock icon, no menu,
-   no settings screen. The popover is the whole product.
+2. **The menu bar is the surface.** The menu bar item and popover are the
+   primary glanceable surface; the settings/onboarding window is a brief,
+   native sidebar-style detour for connection setup. No Dock icon.
 3. **Apple-native, not a port.** Designed against the current macOS visual
    language. Looks like a system app, not a third-party widget. Liquid Glass
    when the host supports it; faithful fallback when it does not.
@@ -165,10 +179,14 @@ oversight — a personal tool for a single user does not need a brand.
 ## Accessibility & Inclusion
 
 - **Dynamic Type:** all text scales with the user's preferred reading size
-  (the popover uses semantic font styles: `.title3`, `.caption`, `.caption2`).
+  (the popover uses semantic font styles: `.title3`, `.caption`, `.caption2`;
+  the settings window uses semantic styles throughout and scrolls internally
+  at larger sizes).
 - **VoiceOver:** the status bar item and the refresh button carry explicit
   accessibility labels (`"Refresh"`); the popover's "Connected" / "Offline"
-  status and the "Last synced: …" footer are readable.
+  status and the "Last synced: …" footer are readable. Settings fields,
+  buttons, validation feedback, and connection-test status all carry labels
+  and hints, and never include the API key in announcements.
 - **Reduce Transparency:** the popover, the hero card, and the refresh
   button all read `\.accessibilityReduceTransparency` and fall back to
   `Color(nsColor: .windowBackgroundColor)` instead of glass / material. This
@@ -183,7 +201,6 @@ oversight — a personal tool for a single user does not need a brand.
 
 ## Out of scope (recorded so future work does not reinvent it)
 
-- A settings window, a preferences screen, or any second window.
 - Historical charts, energy history, daily / weekly / monthly aggregates.
 - A Growatt account login flow, multi-inverter support, multi-site support.
 - Notifications, banners, or any background alert system.
