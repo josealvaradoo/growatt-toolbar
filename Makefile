@@ -8,8 +8,12 @@ BUILD_DIR := .build/release
 DIST_DIR := dist
 APP_BUNDLE := $(DIST_DIR)/$(BUNDLE_NAME).app
 DMG_FILE := $(DIST_DIR)/$(DMG_NAME).dmg
+DMG_RW_FILE := $(DIST_DIR)/$(DMG_NAME)-rw.dmg
+DMG_STAGING_DIR := $(DIST_DIR)/.dmg-staging
+DMG_BACKGROUND_DIR := $(DMG_STAGING_DIR)/.background
 ICONSET_DIR := $(DIST_DIR)/$(BUNDLE_NAME).iconset
 ICNS_FILE := $(DIST_DIR)/$(BUNDLE_NAME).icns
+DMG_CONFIG_SCRIPT := scripts/configure-dmg.applescript
 
 build:
 	@echo "==> Building $(APP_NAME) in release configuration..."
@@ -49,7 +53,21 @@ app: build icons
 
 dmg: app
 	@echo "==> Creating $(DMG_FILE)..."
-	hdiutil create -volname "$(DMG_NAME)" -srcfolder "$(APP_BUNDLE)" -ov -format UDZO "$(DMG_FILE)"
+	hdiutil detach "/Volumes/$(BUNDLE_NAME)" >/dev/null 2>&1 || true
+	rm -rf "$(DMG_STAGING_DIR)"
+	rm -f "$(DMG_RW_FILE)"
+	mkdir -p "$(DMG_STAGING_DIR)"
+	mkdir -p "$(DMG_BACKGROUND_DIR)"
+	cp -R "$(APP_BUNDLE)" "$(DMG_STAGING_DIR)/"
+	ln -s /Applications "$(DMG_STAGING_DIR)/Applications"
+	cp Resources/background.png "$(DMG_BACKGROUND_DIR)/background.png"
+	hdiutil create -volname "$(BUNDLE_NAME)" -srcfolder "$(DMG_STAGING_DIR)" -ov -format UDRW "$(DMG_RW_FILE)"
+	hdiutil attach -nobrowse "$(DMG_RW_FILE)"
+	osascript "$(DMG_CONFIG_SCRIPT)"
+	hdiutil detach "/Volumes/$(BUNDLE_NAME)"
+	hdiutil convert "$(DMG_RW_FILE)" -ov -format UDZO -o "$(DMG_FILE)"
+	rm -f "$(DMG_RW_FILE)"
+	rm -rf "$(DMG_STAGING_DIR)"
 	@echo "==> DMG ready: $(DMG_FILE)"
 
 clean:

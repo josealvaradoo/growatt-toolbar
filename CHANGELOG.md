@@ -5,6 +5,22 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.2 (2026-07-31)
+
+---
+
+### Added
+
+- Custom DMG Finder window with the provided background image, hidden Finder chrome, and positioned installer icons.
+
+## 0.5.1 (2026-07-31)
+
+---
+
+### Fixed
+
+- DMG installer now includes an `Applications` symlink next to the app bundle for drag-to-install packaging.
+
 ## 0.5.0 (2026-07-31)
 
 ---
