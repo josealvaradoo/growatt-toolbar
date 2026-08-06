@@ -92,13 +92,17 @@ public final class InverterViewModel {
     /// Triggers a refresh. Concurrent callers (the polling loop and the
     /// manual refresh button) share a single in-flight task, so the second
     /// caller awaits the first rather than racing it.
-    public func refreshData() async {
+    ///
+    /// - Parameter bypassCache: When `true`, the manual refresh asks the
+    ///   upstream for a fresh (non-cached) reading. The polling loop passes
+    ///   `false` so background ticks don't defeat the upstream cache.
+    public func refreshData(bypassCache: Bool = false) async {
         if let inFlight = inFlightRefresh {
             await inFlight.value
             return
         }
         let task = Task { [weak self] in
-            await self?.performRefresh()
+            await self?.performRefresh(bypassCache: bypassCache)
             return
         }
         inFlightRefresh = task
@@ -106,10 +110,10 @@ public final class InverterViewModel {
         inFlightRefresh = nil
     }
 
-    private func performRefresh() async {
+    private func performRefresh(bypassCache: Bool) async {
         isLoading = true
         do {
-            self.status = try await apiService.fetchInverterStatus()
+            self.status = try await apiService.fetchInverterStatus(bypassCache: bypassCache)
             self.error = nil
             self.hasReceivedFirstReading = true
         } catch let typedError as GrowattAPIError {
@@ -128,7 +132,7 @@ public final class InverterViewModel {
         stopAutoRefresh()
         pollingTask = Task { [weak self] in
             while !Task.isCancelled {
-                await self?.refreshData()
+                await self?.refreshData(bypassCache: false)
                 try? await Task.sleep(nanoseconds: UInt64(intervalSeconds * 1_000_000_000))
             }
         }

@@ -54,7 +54,7 @@ public struct ErrorBannerView: View {
             HStack {
                 Spacer(minLength: GlassTokens.Spacing.sm)
                 RefreshButton(isLoading: viewModel.isLoading) {
-                    Task { await viewModel.refreshData() }
+                    Task { await viewModel.refreshData(bypassCache: true) }
                 }
             }
         }

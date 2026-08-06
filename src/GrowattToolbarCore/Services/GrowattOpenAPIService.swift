@@ -33,10 +33,29 @@ public final class GrowattOpenAPIService: GrowattAPIServiceProtocol, Sendable {
         self.session = session
     }
 
-    public func fetchInverterStatus() async throws -> InverterStatus {
+    public func fetchInverterStatus(bypassCache: Bool = false) async throws -> InverterStatus {
         guard !apiToken.isEmpty else { throw GrowattAPIError.unauthorized }
 
-        var request = URLRequest(url: baseURL.appendingPathComponent("status"))
+        let statusURL = baseURL.appendingPathComponent("status")
+        let requestURL: URL
+        if bypassCache {
+            guard var components = URLComponents(
+                url: statusURL,
+                resolvingAgainstBaseURL: false
+            ) else {
+                throw GrowattAPIError.networkError("Invalid status URL")
+            }
+            components.queryItems = (components.queryItems ?? [])
+                + [URLQueryItem(name: "cache", value: "false")]
+            guard let urlWithQuery = components.url else {
+                throw GrowattAPIError.networkError("Invalid status URL")
+            }
+            requestURL = urlWithQuery
+        } else {
+            requestURL = statusURL
+        }
+
+        var request = URLRequest(url: requestURL)
         request.httpMethod = "GET"
         request.addValue(apiToken, forHTTPHeaderField: "x-api-key")
         request.addValue("application/json", forHTTPHeaderField: "Accept")

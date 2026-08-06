@@ -161,7 +161,7 @@ public struct GrowattPopoverView: View {
                 Spacer()
 
                 RefreshButton(isLoading: viewModel.isLoading) {
-                    Task { await viewModel.refreshData() }
+                    Task { await viewModel.refreshData(bypassCache: true) }
                 }
             }
             .accessibilityElement(children: .combine)
