@@ -5,6 +5,17 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.1 (2026-08-12)
+
+---
+
+### Documentation
+
+- Add a human-focused README covering setup, the local API contract, security,
+  build and packaging commands, runtime behavior, architecture, and
+  troubleshooting.
+- Document manual refresh cache bypass behavior introduced after 0.6.0.
+
 ## 0.6.0 (2026-08-01)
 
 ---
