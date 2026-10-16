@@ -5,6 +5,16 @@ All notable changes to **Growatt Toolbar Status** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.6.2 (2026-10-16)
+
+---
+
+### Fixed
+
+- Removed redundant inner `.background { popoverBackground }` from `GrowattPopoverView` to prevent stacking glass on glass inside `NSPopover`, eliminating the unwanted inner specular rim border and 13pt offset.
+- Guarded popover `Divider()` so it only renders when `stateRow` is active, removing the orphan bottom hairline in the `.awaiting` state.
+- Harmonized popover content size in `StatusBarController` (`280x150`) with `GrowattPopoverView`'s intrinsic layout height.
+
 ## 0.6.1 (2026-08-12)
 
 ---
