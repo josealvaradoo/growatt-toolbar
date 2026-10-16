@@ -1,11 +1,9 @@
 import SwiftUI
 
-/// 280pt flat two-column Control Center tile. Single `.glassEffect(.regular,
-/// in:)` shell. Flat content (no inner cards). Two-column hero: battery % left,
-/// home load kW right. Thin neutral battery bar. State/freshness row with accent
-/// state signal and inline trust indicator. On macOS 15 the popover background
-/// falls back to `.ultraThinMaterial`. Honors `accessibilityReduceTransparency`
-/// and `accessibilityReduceMotion` throughout.
+/// 280pt flat two-column Control Center tile rendered directly inside NSPopover's
+/// native liquid glass shell. Flat content (no inner cards or nested glass backgrounds).
+/// Two-column hero: battery % left, home load kW right. Thin neutral battery bar.
+/// State/freshness row with accent state signal and inline trust indicator.
 ///
 /// **Honesty layer.** The popover renders one of four `Freshness` states at
 /// all times: `.awaiting` (placeholder columns + "Connecting…"), `.live` /
@@ -15,8 +13,6 @@ import SwiftUI
 /// for a calm state change. The state row's `FreshnessIndicatorView`
 /// is the single source of truth for trust.
 public struct GrowattPopoverView: View {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable public var viewModel: InverterViewModel
 
     public init(viewModel: InverterViewModel) {
@@ -28,13 +24,14 @@ public struct GrowattPopoverView: View {
             heroSection
             if viewModel.freshness != .error {
                 batteryBarSection
+            }
+            if viewModel.freshness != .awaiting && viewModel.freshness != .error {
                 Divider()
                 stateRow
             }
         }
         .padding(GlassTokens.Padding.popover)
         .frame(width: 280)
-        .background { popoverBackground }
         .animation(.easeInOut(duration: 0.25), value: viewModel.freshness)
     }
 
@@ -168,37 +165,6 @@ public struct GrowattPopoverView: View {
             .accessibilityLabel("\(viewModel.status.state.title). \(viewModel.freshness.accessibilityLabel()). Refresh button.")
         }
     }
-
-    // MARK: - Backgrounds
-
-    @ViewBuilder
-    private var popoverBackground: some View {
-        let shape = RoundedRectangle(cornerRadius: PopoverGeometry.cornerRadius, style: .continuous)
-        if reduceTransparency {
-            shape.fill(Color(nsColor: .windowBackgroundColor))
-        } else if #available(macOS 26, *) {
-            shape
-                .fill(Color.clear)
-                .glassEffect(.regular, in: shape)
-        } else {
-            shape.fill(.ultraThinMaterial)
-        }
-    }
-}
-
-/// Geometric constants for the popover window. Kept local to this
-/// file because the popover is the only surface that uses them.
-///
-/// On macOS 26+, the principled choice would be SwiftUI's
-/// `.containerConcentric` static (applied via
-/// `RoundedRectangle(...).corners(.containerConcentric())`) — it
-/// resolves at runtime to the system window's corner radius, so the
-/// popover's content edge is concentric with the window's bezel. That
-/// API is macOS 26+ only and requires platform branching; the fixed
-/// value below is a reasonable approximation that works on both
-/// macOS 15 and macOS 26+.
-private enum PopoverGeometry {
-    static let cornerRadius: CGFloat = 24
 }
 
 struct GrowattPopoverView_Previews: PreviewProvider {
